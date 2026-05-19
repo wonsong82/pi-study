@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pi Coding Agent — Navigable Study Notes</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f1117;
+      --panel: #171a22;
+      --panel-2: #1e2330;
+      --text: #e8eaf0;
+      --muted: #a7adbb;
+      --accent: #7cc7ff;
+      --warn: #ffd479;
+      --border: #303545;
+      --code: #232838;
+      --shadow: rgba(0, 0, 0, 0.25);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafafa;
+        --panel: #ffffff;
+        --panel-2: #f3f5f8;
+        --text: #1f2430;
+        --muted: #5c6472;
+        --accent: #0969da;
+        --warn: #9a6700;
+        --border: #d8dee8;
+        --code: #f3f5f8;
+        --shadow: rgba(0, 0, 0, 0.08);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      background: var(--code);
+      border-radius: 6px;
+    }
+    code { padding: 2px 5px; }
+    pre { padding: 14px; overflow-x: auto; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th, td { border: 1px solid var(--border); padding: 10px; vertical-align: top; }
+    th { background: var(--panel-2); text-align: left; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 22px 18px;
+      border-right: 1px solid var(--border);
+      background: var(--panel);
+    }
+    main {
+      max-width: 980px;
+      width: 100%;
+      padding: 40px 28px 80px;
+      margin: 0 auto;
+    }
+    .brand { font-weight: 800; font-size: 1.2rem; margin-bottom: 4px; }
+    .subtitle, .muted { color: var(--muted); }
+    .search {
+      width: 100%;
+      margin: 18px 0 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .nav-group { margin-top: 16px; }
+    .nav-title { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 12px 0 6px; }
+    nav a { display: block; padding: 5px 0; color: var(--text); font-size: 0.95rem; }
+    nav a:hover { color: var(--accent); }
+    header.hero {
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, var(--panel), transparent);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 10px 35px var(--shadow);
+    }
+    h1 { margin: 0 0 8px; font-size: 2.35rem; line-height: 1.15; }
+    h2 { margin: 0 0 12px; line-height: 1.25; }
+    h3 { color: var(--accent); margin-bottom: 8px; }
+    section.doc-section {
+      margin-top: 28px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+      scroll-margin-top: 20px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .card h3 { margin-top: 0; }
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 9px;
+      margin: 2px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: var(--panel-2);
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin: 12px 0;
+    }
+    .warn { border-left-color: var(--warn); }
+    details {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin: 10px 0;
+    }
+    summary { cursor: pointer; font-weight: 700; }
+    .quick-list { columns: 2; }
+    .hidden-by-search { display: none; }
+    .top-link { display: inline-block; margin-top: 10px; color: var(--muted); font-size: 0.9rem; }
+    .no-results { display: none; padding: 16px; border: 1px dashed var(--border); border-radius: 12px; color: var(--muted); }
+    @media (max-width: 860px) {
+      .layout { display: block; }
+      aside { position: relative; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+      main { padding: 24px 16px 60px; }
+      .quick-list { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout" id="top">
+    <aside>
+      <div class="brand">Pi Study Notes</div>
+      <div class="muted">Quick navigation + searchable reference</div>
+      <input id="search" class="search" type="search" placeholder="Search sections..." aria-label="Search sections" />
+      <nav>
+        <div class="nav-group">
+          <div class="nav-title">Start here</div>
+          <a href="#overview">What is pi?</a>
+          <a href="#mental-model">Mental model</a>
+          <a href="#quick-reference">Quick reference</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Core</div>
+          <a href="#tools">Default tools</a>
+          <a href="#default-system-prompt">Default system prompt</a>
+          <a href="#prompt-flow">Prompt generation flow</a>
+          <a href="#interactive">Interactive usage</a>
+          <a href="#settings">Settings</a>
+          <a href="#context">Context files</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Customization</div>
+          <a href="#customization-map">Customization map</a>
+          <a href="#extensions">Extensions</a>
+          <a href="#plan-mode">Plan mode</a>
+          <a href="#skills">Skills</a>
+          <a href="#prompts">Prompt templates</a>
+          <a href="#skills-vs-prompts">Skills vs prompts</a>
+          <a href="#themes">Themes</a>
+          <a href="#packages">Pi packages</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Learning</div>
+          <a href="#study-checklist">Study checklist</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <h1>Pi Coding Agent</h1>
+        <p class="subtitle">A navigable overview, introduction, and self-study note for remembering how pi works and how to customize it.</p>
+        <p>
+          <span class="tag">terminal coding agent</span>
+          <span class="tag">extensions</span>
+          <span class="tag">skills</span>
+          <span class="tag">prompt templates</span>
+          <span class="tag">themes</span>
+          <span class="tag">packages</span>
+        </p>
+      </header>
+
+      <p id="no-results" class="no-results">No matching sections. Try another search term.</p>
+
+      <section id="overview" class="doc-section" data-search="what is pi terminal coding harness llm tools workspace">
+        <h2>1. What is pi?</h2>
+        <p><strong>pi</strong> is a minimal terminal coding harness. It connects an LLM to a coding workspace and gives the model tools such as <code>read</code>, <code>write</code>, <code>edit</code>, and <code>bash</code>.</p>
+        <p>Instead of shipping every workflow as a built-in feature, pi expects users to adapt it with extensions, skills, prompt templates, themes, packages, settings, and context files.</p>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="mental-model" class="doc-section" data-search="mental model prompt skill extension for me for agent runtime behavior">
+        <h2>2. Mental model</h2>
+        <div class="note"><strong>pi is the harness</strong>, the LLM is the reasoning engine, tools are the hands, and extensions/skills/templates teach pi your workflow.</div>
+        <table>
+          <thead><tr><th>Thing</th><th>Think of it as</th></tr></thead>
+          <tbody>
+            <tr><td>Prompt template</td><td><strong>User-facing macro</strong>: for me, to quickly say a common request.</td></tr>
+            <tr><td>Skill</td><td><strong>Agent-facing capability/manual</strong>: for the agent, to learn reusable workflows and references.</td></tr>
+            <tr><td>Extension</td><td><strong>Runtime behavior</strong>: TypeScript code that changes what pi can do.</td></tr>
+          </tbody>
+        </table>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="tools" class="doc-section" data-search="default tools read write edit bash">
+        <h2>3. Default agent tools</h2>
+        <table>
+          <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>read</code></td><td>Read files from the workspace.</td></tr>
+            <tr><td><code>write</code></td><td>Create or overwrite files.</td></tr>
+            <tr><td><code>edit</code></td><td>Patch files using exact text replacement.</td></tr>
+            <tr><td><code>bash</code></td><td>Run shell commands such as tests, search, git commands, etc.</td></tr>
+          </tbody>
+        </table>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="default-system-prompt" class="doc-section" data-search="default system prompt exact out of box instructions available tools guidelines pi documentation current date working directory">
+        <h2>4. Default system prompt</h2>
+        <p>This is pi's out-of-the-box default system prompt shape. The date, working directory, installed pi path, active tools, loaded context files, skills, and extensions can change the effective prompt at runtime.</p>
+        <details open>
+          <summary>Exact default prompt for this project/session</summary>
+          <pre><code>You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
+
+Available tools:
+- read: Read file contents
+- bash: Execute bash commands (ls, grep, find, etc.)
+- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call
+- write: Create or overwrite files
+
+In addition to the tools above, you may have access to other custom tools depending on the project.
+
+Guidelines:
+- Use bash for file operations like ls, rg, find
+- Use read to examine files instead of cat or sed.
+- Use edit for precise changes (edits[].oldText must match exactly)
+- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls
+- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.
+- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.
+- Use write only for new files or complete rewrites.
+- Be concise in your responses
+- Show file paths clearly when working with files
+
+Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):
+- Main documentation: /Users/won/.nvm/versions/node/v24.15.0/lib/node_modules/@earendil-works/pi-coding-agent/README.md
+- Additional docs: /Users/won/.nvm/versions/node/v24.15.0/lib/node_modules/@earendil-works/pi-coding-agent/docs
+- Examples: /Users/won/.nvm/versions/node/v24.15.0/lib/node_modules/@earendil-works/pi-coding-agent/examples (extensions, custom tools, SDK)
+- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)
+- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing
+- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
+Current date: 2026-05-19
+Current working directory: /Users/won/code/won/pi</code></pre>
+        </details>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="prompt-flow" class="doc-section" data-search="prompt generation flow input tokens system prompt AGENTS skills templates extensions before_agent_start tool schemas messages model request">
+        <h2>5. Prompt generation flow</h2>
+        <p>Pi does not send only your typed text to the model. The model input is assembled from the effective system prompt, conversation history, your expanded user message, extension-injected messages, tool schemas, and tool results.</p>
+
+        <div class="note">
+          Key distinction: <strong>AGENTS.md affects system prompt context</strong>, <strong>prompt templates affect your user message</strong>, <strong>skills are advertised in the system prompt and can be loaded into user context</strong>, and <strong>extensions can modify almost every stage</strong>.
+        </div>
+
+        <svg viewBox="0 0 960 640" role="img" aria-label="Pi prompt generation flow diagram" style="width:100%;height:auto;border:1px solid var(--border);border-radius:14px;background:var(--panel-2);margin:14px 0;">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <style>
+            .box { fill: var(--panel); stroke: var(--border); stroke-width: 2; }
+            .accent { fill: color-mix(in srgb, var(--accent) 18%, var(--panel)); stroke: var(--accent); }
+            .warnbox { fill: color-mix(in srgb, var(--warn) 16%, var(--panel)); stroke: var(--warn); }
+            .txt { fill: var(--text); font: 600 15px system-ui, sans-serif; }
+            .smalltxt { fill: var(--muted); font: 12px system-ui, sans-serif; }
+            .line { stroke: var(--muted); stroke-width: 2; marker-end: url(#arrow); fill: none; }
+          </style>
+          <rect class="box accent" x="40" y="30" width="250" height="82" rx="12"></rect>
+          <text class="txt" x="62" y="60">1. Startup / reload</text>
+          <text class="smalltxt" x="62" y="84">Load settings, packages, resources</text>
+
+          <rect class="box" x="355" y="30" width="250" height="82" rx="12"></rect>
+          <text class="txt" x="377" y="60">2. Extensions load</text>
+          <text class="smalltxt" x="377" y="84">Register tools, commands, hooks</text>
+
+          <rect class="box" x="670" y="30" width="250" height="82" rx="12"></rect>
+          <text class="txt" x="692" y="60">3. Resources discovered</text>
+          <text class="smalltxt" x="692" y="84">AGENTS, skills, prompts, SYSTEM</text>
+
+          <path class="line" d="M290 71 H355"></path>
+          <path class="line" d="M605 71 H670"></path>
+
+          <rect class="box accent" x="355" y="160" width="250" height="90" rx="12"></rect>
+          <text class="txt" x="377" y="190">4. Base system prompt</text>
+          <text class="smalltxt" x="377" y="214">Default or SYSTEM.md + append</text>
+          <text class="smalltxt" x="377" y="232">+ AGENTS + skills + cwd/date</text>
+          <path class="line" d="M795 112 V205 H605"></path>
+
+          <rect class="box warnbox" x="40" y="300" width="250" height="90" rx="12"></rect>
+          <text class="txt" x="62" y="330">5. User input</text>
+          <text class="smalltxt" x="62" y="354">Raw text, images, slash commands</text>
+
+          <rect class="box" x="355" y="300" width="250" height="90" rx="12"></rect>
+          <text class="txt" x="377" y="330">6. Expand / transform</text>
+          <text class="smalltxt" x="377" y="354">input hooks, /skill, /template</text>
+
+          <rect class="box" x="670" y="300" width="250" height="90" rx="12"></rect>
+          <text class="txt" x="692" y="330">7. before_agent_start</text>
+          <text class="smalltxt" x="692" y="354">Extensions may add messages</text>
+          <text class="smalltxt" x="692" y="372">or replace prompt this turn</text>
+
+          <path class="line" d="M290 345 H355"></path>
+          <path class="line" d="M605 345 H670"></path>
+          <path class="line" d="M480 250 V300"></path>
+
+          <rect class="box accent" x="180" y="470" width="280" height="108" rx="12"></rect>
+          <text class="txt" x="202" y="500">8. Final model request</text>
+          <text class="smalltxt" x="202" y="524">system prompt + history</text>
+          <text class="smalltxt" x="202" y="542">+ expanded user message</text>
+          <text class="smalltxt" x="202" y="560">+ custom messages + tool schemas</text>
+
+          <rect class="box" x="550" y="470" width="280" height="108" rx="12"></rect>
+          <text class="txt" x="572" y="500">9. Tool loop</text>
+          <text class="smalltxt" x="572" y="524">tool_call hooks → execute tool</text>
+          <text class="smalltxt" x="572" y="542">append tool result → call model again</text>
+
+          <path class="line" d="M795 390 V424 H320 V470"></path>
+          <path class="line" d="M460 524 H550"></path>
+          <path class="line" d="M690 470 C690 420 520 420 520 470"></path>
+        </svg>
+
+        <details open>
+          <summary>Step-by-step details</summary>
+          <ol>
+            <li><strong>Startup/reload:</strong> pi loads settings, packages, extensions, skills, prompt templates, themes, context files, <code>SYSTEM.md</code>, and <code>APPEND_SYSTEM.md</code>.</li>
+            <li><strong>Extensions register capabilities:</strong> tools, commands, flags, input hooks, tool hooks, and <code>before_agent_start</code> hooks.</li>
+            <li><strong>Active tools are selected:</strong> usually <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>, but extensions like plan-mode can change them.</li>
+            <li><strong>Base system prompt is built:</strong> default prompt or <code>SYSTEM.md</code>, plus appended system text, project context, skills, current date, and working directory.</li>
+            <li><strong>User input is processed:</strong> extension commands may handle it directly; input hooks may transform it; <code>/skill:name</code> and prompt templates are expanded.</li>
+            <li><strong>Before model call:</strong> <code>before_agent_start</code> hooks can inject custom messages or modify the system prompt for this turn.</li>
+            <li><strong>Model receives:</strong> effective system prompt, conversation history, current user message, extension messages, and active tool schemas.</li>
+            <li><strong>Tool loop:</strong> model tool calls are intercepted by hooks, executed, appended as tool results, then sent back to the model until the assistant finishes.</li>
+          </ol>
+        </details>
+
+        <details>
+          <summary>Where different customization types enter the token stream</summary>
+          <table>
+            <thead><tr><th>Source</th><th>Where it enters</th></tr></thead>
+            <tbody>
+              <tr><td><code>AGENTS.md</code> / <code>CLAUDE.md</code></td><td>Appended as project context in the system prompt.</td></tr>
+              <tr><td><code>SYSTEM.md</code></td><td>Replaces the built-in default system prompt.</td></tr>
+              <tr><td><code>APPEND_SYSTEM.md</code></td><td>Appended to the system prompt.</td></tr>
+              <tr><td>Prompt template</td><td>Expands the user message before the model call.</td></tr>
+              <tr><td><code>/skill:name</code></td><td>Reads the full skill and injects it into the user message.</td></tr>
+              <tr><td>Available skills list</td><td>Advertised in the system prompt when the read tool is active.</td></tr>
+              <tr><td>Extensions</td><td>Can alter tools, active tool list, system prompt, user input, messages, and tool calls.</td></tr>
+              <tr><td>Tool schemas</td><td>Sent separately to the model as callable tool definitions; they also consume input tokens.</td></tr>
+            </tbody>
+          </table>
+        </details>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+
+      <section id="interactive" class="doc-section" data-search="interactive usage slash commands at file reference bang shell command model settings resume new">
+        <h2>6. Interactive usage basics</h2>
+        <ul class="quick-list">
+          <li>Type normal requests in the terminal editor.</li>
+          <li>Use <code>@</code> to reference project files.</li>
+          <li>Use <code>/</code> to open commands, prompt templates, and skill commands.</li>
+          <li>Use <code>!command</code> to run shell and send output to the LLM.</li>
+          <li>Use <code>!!command</code> to run shell without sending output.</li>
+          <li>Common commands: <code>/model</code>, <code>/settings</code>, <code>/resume</code>, <code>/new</code>.</li>
+        </ul>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="customization-map" class="doc-section" data-search="customization map extensions skills prompt templates themes packages settings context">
+        <h2>7. Customization map</h2>
+        <div class="summary">
+          <div class="card"><h3>Extensions</h3><p>TypeScript code that registers commands, tools, events, UI, providers, and behavior changes.</p></div>
+          <div class="card"><h3>Skills</h3><p>On-demand capability packages: instructions plus optional scripts/assets.</p></div>
+          <div class="card"><h3>Prompt templates</h3><p>Markdown snippets expanded by slash commands such as <code>/review</code>.</p></div>
+          <div class="card"><h3>Themes</h3><p>JSON files that customize terminal UI colors.</p></div>
+          <div class="card"><h3>Pi packages</h3><p>Shareable bundles containing extensions, skills, prompts, and themes.</p></div>
+          <div class="card"><h3>Settings & context</h3><p>Project/global config and instructions such as <code>AGENTS.md</code>.</p></div>
+        </div>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="extensions" class="doc-section" data-search="extensions loading convention index ts default export ExtensionAPI registerCommand registerTool registerFlag events">
+        <h2>8. Extensions</h2>
+        <p>Extensions are auto-discovered by file/folder convention.</p>
+        <table>
+          <thead><tr><th>Location</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td><code>~/.pi/agent/extensions/*.ts</code></td><td>Global single-file extension</td></tr>
+            <tr><td><code>~/.pi/agent/extensions/*/index.ts</code></td><td>Global folder extension</td></tr>
+            <tr><td><code>.pi/extensions/*.ts</code></td><td>Project-local single-file extension</td></tr>
+            <tr><td><code>.pi/extensions/*/index.ts</code></td><td>Project-local folder extension</td></tr>
+          </tbody>
+        </table>
+        <details open>
+          <summary>Basic extension shape</summary>
+          <pre><code>import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+
+export default function myExtension(pi: ExtensionAPI): void {
+  pi.registerCommand("hello", {
+    description: "Say hello",
+    handler: async (_args, ctx) =&gt; {
+      ctx.ui.notify("Hello from my extension", "info");
+    },
+  });
+}</code></pre>
+        </details>
+        <details>
+          <summary>What extensions can do</summary>
+          <ul>
+            <li>Register slash commands with <code>pi.registerCommand()</code>.</li>
+            <li>Register model-callable tools with <code>pi.registerTool()</code>.</li>
+            <li>Register CLI flags with <code>pi.registerFlag()</code>.</li>
+            <li>Listen to lifecycle/session/model/tool events with <code>pi.on(...)</code>.</li>
+            <li>Block or modify tool calls.</li>
+            <li>Add status text, widgets, overlays, custom editors, and renderers.</li>
+            <li>Persist session state.</li>
+          </ul>
+        </details>
+        <div class="note warn">Security reminder: extensions are code and run with your system permissions. Only install or copy extensions you trust.</div>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="plan-mode" class="doc-section" data-search="plan mode extension readonly exploration todos done markers bash allowlist">
+        <h2>9. Plan mode extension</h2>
+        <p>Project-local path:</p>
+        <pre><code>.pi/extensions/plan-mode/index.ts
+.pi/extensions/plan-mode/utils.ts
+.pi/extensions/plan-mode/README.md</code></pre>
+        <details open>
+          <summary>What it does</summary>
+          <ol>
+            <li><strong>Plan mode</strong>: restrict tools to read-only exploration.</li>
+            <li><strong>Bash allowlist</strong>: allow safe commands like <code>ls</code>, <code>grep</code>, <code>find</code>, <code>git diff</code>.</li>
+            <li><strong>Plan extraction</strong>: parse numbered steps from a <code>Plan:</code> section.</li>
+            <li><strong>Execution mode</strong>: restore normal tools and track progress.</li>
+            <li><strong>Completion markers</strong>: assistant marks steps with <code>[DONE:n]</code>.</li>
+            <li><strong>UI progress</strong>: footer/status widget displays progress.</li>
+          </ol>
+        </details>
+        <p>Commands: <code>/plan</code>, <code>/todos</code>, <code>Ctrl+Alt+P</code>.</p>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="skills" class="doc-section" data-search="skills SKILL md agent capability manual workflows scripts assets skill command">
+        <h2>10. Skills</h2>
+        <p>Skills are self-contained instructions loaded on demand. They are useful for reusable workflows that do not need runtime TypeScript hooks.</p>
+        <pre><code>.pi/skills/my-skill/SKILL.md</code></pre>
+        <p>Use with:</p>
+        <pre><code>/skill:my-skill
+/skill:my-skill optional arguments here</code></pre>
+        <p>Good for release workflows, framework conventions, documentation generation, debugging playbooks, helper scripts, and reference material.</p>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="prompts" class="doc-section" data-search="prompt templates prompts markdown slash command arguments ARGUMENTS review">
+        <h2>11. Prompt templates</h2>
+        <p>Prompt templates are Markdown files under <code>.pi/prompts/</code>. The filename becomes a slash command.</p>
+        <pre><code>.pi/prompts/review.md   =&gt;   /review</code></pre>
+        <details open>
+          <summary>Example template</summary>
+          <pre><code>---
+description: Review staged git changes
+argument-hint: "[focus]"
+---
+Review the staged changes with focus on: $ARGUMENTS
+
+Check:
+- correctness
+- security
+- tests
+- maintainability</code></pre>
+        </details>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="skills-vs-prompts" class="doc-section" data-search="skills vs prompts prompt template for me skill for agent user macro capability manual">
+        <h2>12. Skills vs prompt templates</h2>
+        <div class="note">Simple mental model: <strong>prompt templates are for you</strong>; <strong>skills are for the agent</strong>.</div>
+        <table>
+          <thead><tr><th>Resource</th><th>Mental model</th><th>Use when...</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Prompt template</strong></td><td>User-facing macro</td><td>You want to quickly insert or send a reusable prompt.</td></tr>
+            <tr><td><strong>Skill</strong></td><td>Agent-facing capability/manual</td><td>You want the agent to learn reusable workflow, checklist, scripts, or references.</td></tr>
+          </tbody>
+        </table>
+        <pre><code>Prompt template: user-facing macro
+Skill:           agent-facing capability/manual
+Extension:       runtime code that changes pi behavior</code></pre>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="themes" class="doc-section" data-search="themes json colors tui settings">
+        <h2>13. Themes</h2>
+        <p>Themes are JSON color definitions for the TUI.</p>
+        <pre><code>.pi/themes/my-theme.json</code></pre>
+        <p>Select via <code>/settings</code> or settings JSON:</p>
+        <pre><code>{
+  "theme": "my-theme"
+}</code></pre>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="settings" class="doc-section" data-search="settings json global project model provider theme packages skills prompts">
+        <h2>14. Settings</h2>
+        <table>
+          <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>~/.pi/agent/settings.json</code></td><td>User/global settings.</td></tr>
+            <tr><td><code>.pi/settings.json</code></td><td>Project-local settings, useful for team/project conventions.</td></tr>
+          </tbody>
+        </table>
+        <p>Settings can configure models, providers, theme, packages, skills, prompts, etc.</p>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="context" class="doc-section" data-search="context files AGENTS md project instructions build test style architecture safety">
+        <h2>15. Context files</h2>
+        <p>Context files such as <code>AGENTS.md</code> give pi project-specific instructions: coding style, commands, test strategy, architecture notes, and repository conventions.</p>
+        <ul>
+          <li>How to build and test the project.</li>
+          <li>Code style and naming conventions.</li>
+          <li>Important directories and architecture overview.</li>
+          <li>Safety rules, such as files never to edit.</li>
+          <li>Preferred workflows for commits, releases, or reviews.</li>
+        </ul>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="packages" class="doc-section" data-search="pi packages npm git bundle extensions skills prompts themes share install">
+        <h2>16. Pi packages</h2>
+        <p>Pi packages bundle extensions, skills, prompt templates, and themes so they can be shared via npm, git, URL, or local path.</p>
+        <pre><code>pi install npm:@scope/package
+pi install git:github.com/user/repo
+pi install ./local-package</code></pre>
+        <p>Use project-local install/settings when the package should belong to this repo.</p>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="quick-reference" class="doc-section" data-search="quick reference goal use extensions skills prompts themes settings AGENTS">
+        <h2>17. Quick reference</h2>
+        <table>
+          <thead><tr><th>Goal</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>Add runtime behavior, hooks, tools, UI</td><td><code>.pi/extensions/</code></td></tr>
+            <tr><td>Add reusable task instructions</td><td><code>.pi/skills/</code></td></tr>
+            <tr><td>Add slash prompt shortcuts</td><td><code>.pi/prompts/</code></td></tr>
+            <tr><td>Change colors</td><td><code>.pi/themes/</code></td></tr>
+            <tr><td>Configure project behavior</td><td><code>.pi/settings.json</code></td></tr>
+            <tr><td>Document repo instructions</td><td><code>AGENTS.md</code></td></tr>
+            <tr><td>Share reusable pi resources</td><td>Pi package via npm/git/local path</td></tr>
+          </tbody>
+        </table>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="study-checklist" class="doc-section" data-search="study checklist learn extension skill prompt template AGENTS">
+        <h2>18. Study checklist</h2>
+        <ul>
+          <li>Understand default tools: read/write/edit/bash.</li>
+          <li>Learn extension loading conventions.</li>
+          <li>Read through <code>.pi/extensions/plan-mode/index.ts</code>.</li>
+          <li>Identify where it registers commands, flags, and event handlers.</li>
+          <li>Compare extension = runtime behavior, skill = agent-facing capability, prompt template = user-facing macro.</li>
+          <li>Create one small prompt template.</li>
+          <li>Create one tiny extension command.</li>
+          <li>Write or update <code>AGENTS.md</code> for this project.</li>
+        </ul>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const search = document.getElementById('search');
+    const sections = [...document.querySelectorAll('.doc-section')];
+    const noResults = document.getElementById('no-results');
+
+    search.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      let shown = 0;
+      for (const section of sections) {
+        const haystack = (section.innerText + ' ' + (section.dataset.search || '')).toLowerCase();
+        const match = !q || haystack.includes(q);
+        section.classList.toggle('hidden-by-search', !match);
+        if (match) shown++;
+      }
+      noResults.style.display = shown === 0 ? 'block' : 'none';
+    });
+  </script>
+</body>
+</html>
