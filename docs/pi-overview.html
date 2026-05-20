@@ -172,7 +172,7 @@
         </div>
         <div class="nav-group">
           <div class="nav-title">Core</div>
-          <a href="#tools">Default tools</a>
+          <a href="#tools">Built-in / active tools</a>
           <a href="#default-system-prompt">Default system prompt</a>
           <a href="#prompt-flow">Prompt generation flow</a>
           <a href="#interactive">Interactive usage</a>
@@ -183,12 +183,17 @@
           <div class="nav-title">Customization</div>
           <a href="#customization-map">Customization map</a>
           <a href="#extensions">Extensions</a>
-          <a href="#plan-mode">Plan mode</a>
+          <a href="#extension-events">Extension events</a>
           <a href="#skills">Skills</a>
           <a href="#prompts">Prompt templates</a>
           <a href="#skills-vs-prompts">Skills vs prompts</a>
           <a href="#themes">Themes</a>
           <a href="#packages">Pi packages</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Example studies</div>
+          <a href="#plan-mode">Plan mode example</a>
+          <a href="#example-extensions">Example extensions</a>
         </div>
         <div class="nav-group">
           <div class="nav-title">Learning</div>
@@ -214,14 +219,14 @@
       <p id="no-results" class="no-results">No matching sections. Try another search term.</p>
 
       <section id="overview" class="doc-section" data-search="what is pi terminal coding harness llm tools workspace">
-        <h2>1. What is pi?</h2>
+        <h2>What is pi?</h2>
         <p><strong>pi</strong> is a minimal terminal coding harness. It connects an LLM to a coding workspace and gives the model tools such as <code>read</code>, <code>write</code>, <code>edit</code>, and <code>bash</code>.</p>
         <p>Instead of shipping every workflow as a built-in feature, pi expects users to adapt it with extensions, skills, prompt templates, themes, packages, settings, and context files.</p>
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
       <section id="mental-model" class="doc-section" data-search="mental model prompt skill extension for me for agent runtime behavior">
-        <h2>2. Mental model</h2>
+        <h2>Mental model</h2>
         <div class="note"><strong>pi is the harness</strong>, the LLM is the reasoning engine, tools are the hands, and extensions/skills/templates teach pi your workflow.</div>
         <table>
           <thead><tr><th>Thing</th><th>Think of it as</th></tr></thead>
@@ -234,22 +239,38 @@
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
-      <section id="tools" class="doc-section" data-search="default tools read write edit bash">
-        <h2>3. Default agent tools</h2>
+      <section id="tools" class="doc-section" data-search="built in tools active tools registered tools read write edit bash grep find ls default agent tools">
+        <h2>Built-in and active tools</h2>
+        <p>Pi has a distinction between <strong>registered tools</strong> and <strong>active tools</strong>.</p>
         <table>
-          <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+          <thead><tr><th>Concept</th><th>Meaning</th></tr></thead>
           <tbody>
-            <tr><td><code>read</code></td><td>Read files from the workspace.</td></tr>
-            <tr><td><code>write</code></td><td>Create or overwrite files.</td></tr>
-            <tr><td><code>edit</code></td><td>Patch files using exact text replacement.</td></tr>
-            <tr><td><code>bash</code></td><td>Run shell commands such as tests, search, git commands, etc.</td></tr>
+            <tr><td><strong>Registered tools</strong></td><td>Tools pi knows about. They may be built-in or provided by extensions.</td></tr>
+            <tr><td><strong>Active tools</strong></td><td>Tools currently sent to the model as callable tool schemas.</td></tr>
           </tbody>
         </table>
+        <p>Out of the box, pi normally starts with these active coding tools:</p>
+        <pre><code>read, bash, edit, write</code></pre>
+        <p>But pi also has additional built-in read-only exploration tools that can be activated by modes/extensions:</p>
+        <pre><code>grep, find, ls</code></pre>
+        <table>
+          <thead><tr><th>Tool</th><th>Type</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>read</code></td><td>Default active</td><td>Reads file contents. Supports text files and images. Large text output is truncated and can be continued with offset/limit.</td></tr>
+            <tr><td><code>bash</code></td><td>Default active</td><td>Runs shell commands in the current working directory. Useful for tests, git, search, scripts, and project commands.</td></tr>
+            <tr><td><code>edit</code></td><td>Default active</td><td>Makes precise edits to existing files using exact text replacement. Best for surgical modifications.</td></tr>
+            <tr><td><code>write</code></td><td>Default active</td><td>Creates or overwrites files. Best for new files or complete rewrites.</td></tr>
+            <tr><td><code>grep</code></td><td>Built-in, not always active</td><td>Searches file contents for patterns. Faster/more structured than using bash grep and respects project ignore behavior.</td></tr>
+            <tr><td><code>find</code></td><td>Built-in, not always active</td><td>Finds files by glob/pattern. Useful for codebase exploration without shell commands.</td></tr>
+            <tr><td><code>ls</code></td><td>Built-in, not always active</td><td>Lists directory contents. Useful for safe read-only exploration.</td></tr>
+          </tbody>
+        </table>
+        <div class="note">Example: the plan-mode extension activates <code>grep</code>, <code>find</code>, and <code>ls</code> even though default coding mode usually starts with only <code>read</code>, <code>bash</code>, <code>edit</code>, and <code>write</code>.</div>
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
       <section id="default-system-prompt" class="doc-section" data-search="default system prompt exact out of box instructions available tools guidelines pi documentation current date working directory">
-        <h2>4. Default system prompt</h2>
+        <h2>Default system prompt</h2>
         <p>This is pi's out-of-the-box default system prompt shape. The date, working directory, installed pi path, active tools, loaded context files, skills, and extensions can change the effective prompt at runtime.</p>
         <details open>
           <summary>Exact default prompt for this project/session</summary>
@@ -287,104 +308,115 @@ Current working directory: /Users/won/code/won/pi</code></pre>
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
-      <section id="prompt-flow" class="doc-section" data-search="prompt generation flow input tokens system prompt AGENTS skills templates extensions before_agent_start tool schemas messages model request">
-        <h2>5. Prompt generation flow</h2>
-        <p>Pi does not send only your typed text to the model. The model input is assembled from the effective system prompt, conversation history, your expanded user message, extension-injected messages, tool schemas, and tool results.</p>
+      <section id="prompt-flow" class="doc-section" data-search="prompt generation flow input tokens system prompt AGENTS skills templates extensions before_agent_start tool schemas messages model request instruction stream conversation stream tool loop">
+        <h2>Prompt generation flow</h2>
+        <p>Pi does not send only your typed text to the model. It assembles a structured model request from three streams:</p>
+        <table>
+          <thead><tr><th>Stream</th><th>Contains</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td><strong>A. Instruction stream</strong></td><td>The effective system/developer prompt.</td><td>default prompt or <code>SYSTEM.md</code>, <code>APPEND_SYSTEM.md</code>, <code>AGENTS.md</code>, available skills list, date/cwd, extension prompt changes.</td></tr>
+            <tr><td><strong>B. Conversation stream</strong></td><td>Messages sent to the model.</td><td>previous user/assistant messages, expanded current user message, extension custom messages, previous tool calls/results.</td></tr>
+            <tr><td><strong>C. Tool interface</strong></td><td>Callable tool definitions/schemas.</td><td><code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>, extension tools. These also consume input tokens.</td></tr>
+          </tbody>
+        </table>
 
         <div class="note">
           Key distinction: <strong>AGENTS.md affects system prompt context</strong>, <strong>prompt templates affect your user message</strong>, <strong>skills are advertised in the system prompt and can be loaded into user context</strong>, and <strong>extensions can modify almost every stage</strong>.
         </div>
 
         <svg viewBox="0 0 960 640" role="img" aria-label="Pi prompt generation flow diagram" style="width:100%;height:auto;border:1px solid var(--border);border-radius:14px;background:var(--panel-2);margin:14px 0;">
-          <defs>
-            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
-              <path d="M0,0 L0,6 L9,3 z" fill="currentColor"></path>
-            </marker>
-          </defs>
-          <style>
-            .box { fill: var(--panel); stroke: var(--border); stroke-width: 2; }
-            .accent { fill: color-mix(in srgb, var(--accent) 18%, var(--panel)); stroke: var(--accent); }
-            .warnbox { fill: color-mix(in srgb, var(--warn) 16%, var(--panel)); stroke: var(--warn); }
-            .txt { fill: var(--text); font: 600 15px system-ui, sans-serif; }
-            .smalltxt { fill: var(--muted); font: 12px system-ui, sans-serif; }
-            .line { stroke: var(--muted); stroke-width: 2; marker-end: url(#arrow); fill: none; }
-          </style>
-          <rect class="box accent" x="40" y="30" width="250" height="82" rx="12"></rect>
-          <text class="txt" x="62" y="60">1. Startup / reload</text>
-          <text class="smalltxt" x="62" y="84">Load settings, packages, resources</text>
-
-          <rect class="box" x="355" y="30" width="250" height="82" rx="12"></rect>
-          <text class="txt" x="377" y="60">2. Extensions load</text>
-          <text class="smalltxt" x="377" y="84">Register tools, commands, hooks</text>
-
-          <rect class="box" x="670" y="30" width="250" height="82" rx="12"></rect>
-          <text class="txt" x="692" y="60">3. Resources discovered</text>
-          <text class="smalltxt" x="692" y="84">AGENTS, skills, prompts, SYSTEM</text>
-
-          <path class="line" d="M290 71 H355"></path>
-          <path class="line" d="M605 71 H670"></path>
-
-          <rect class="box accent" x="355" y="160" width="250" height="90" rx="12"></rect>
-          <text class="txt" x="377" y="190">4. Base system prompt</text>
-          <text class="smalltxt" x="377" y="214">Default or SYSTEM.md + append</text>
-          <text class="smalltxt" x="377" y="232">+ AGENTS + skills + cwd/date</text>
-          <path class="line" d="M795 112 V205 H605"></path>
-
-          <rect class="box warnbox" x="40" y="300" width="250" height="90" rx="12"></rect>
-          <text class="txt" x="62" y="330">5. User input</text>
-          <text class="smalltxt" x="62" y="354">Raw text, images, slash commands</text>
-
-          <rect class="box" x="355" y="300" width="250" height="90" rx="12"></rect>
-          <text class="txt" x="377" y="330">6. Expand / transform</text>
-          <text class="smalltxt" x="377" y="354">input hooks, /skill, /template</text>
-
-          <rect class="box" x="670" y="300" width="250" height="90" rx="12"></rect>
-          <text class="txt" x="692" y="330">7. before_agent_start</text>
-          <text class="smalltxt" x="692" y="354">Extensions may add messages</text>
-          <text class="smalltxt" x="692" y="372">or replace prompt this turn</text>
-
-          <path class="line" d="M290 345 H355"></path>
-          <path class="line" d="M605 345 H670"></path>
-          <path class="line" d="M480 250 V300"></path>
-
-          <rect class="box accent" x="180" y="470" width="280" height="108" rx="12"></rect>
-          <text class="txt" x="202" y="500">8. Final model request</text>
-          <text class="smalltxt" x="202" y="524">system prompt + history</text>
-          <text class="smalltxt" x="202" y="542">+ expanded user message</text>
-          <text class="smalltxt" x="202" y="560">+ custom messages + tool schemas</text>
-
-          <rect class="box" x="550" y="470" width="280" height="108" rx="12"></rect>
-          <text class="txt" x="572" y="500">9. Tool loop</text>
-          <text class="smalltxt" x="572" y="524">tool_call hooks → execute tool</text>
-          <text class="smalltxt" x="572" y="542">append tool result → call model again</text>
-
-          <path class="line" d="M795 390 V424 H320 V470"></path>
-          <path class="line" d="M460 524 H550"></path>
-          <path class="line" d="M690 470 C690 420 520 420 520 470"></path>
+          <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="currentColor"></path></marker></defs>
+          <style>.box{fill:var(--panel);stroke:var(--border);stroke-width:2}.accent{fill:color-mix(in srgb,var(--accent) 18%,var(--panel));stroke:var(--accent)}.warnbox{fill:color-mix(in srgb,var(--warn) 16%,var(--panel));stroke:var(--warn)}.txt{fill:var(--text);font:600 15px system-ui,sans-serif}.smalltxt{fill:var(--muted);font:12px system-ui,sans-serif}.line{stroke:var(--muted);stroke-width:2;marker-end:url(#arrow);fill:none}</style>
+          <rect class="box accent" x="40" y="30" width="250" height="82" rx="12"></rect><text class="txt" x="62" y="60">1. Startup / reload</text><text class="smalltxt" x="62" y="84">Load settings, packages, resources</text>
+          <rect class="box" x="355" y="30" width="250" height="82" rx="12"></rect><text class="txt" x="377" y="60">2. Extensions load</text><text class="smalltxt" x="377" y="84">Register tools, commands, hooks</text>
+          <rect class="box" x="670" y="30" width="250" height="82" rx="12"></rect><text class="txt" x="692" y="60">3. Resources in memory</text><text class="smalltxt" x="692" y="84">AGENTS, skills, prompts, SYSTEM</text>
+          <path class="line" d="M290 71 H355"></path><path class="line" d="M605 71 H670"></path>
+          <rect class="box accent" x="355" y="160" width="250" height="90" rx="12"></rect><text class="txt" x="377" y="190">4. Instruction stream</text><text class="smalltxt" x="377" y="214">Default OR SYSTEM.md</text><text class="smalltxt" x="377" y="232">+ append + AGENTS + skills + cwd/date</text><path class="line" d="M795 112 V205 H605"></path>
+          <rect class="box warnbox" x="40" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="62" y="330">5. User input</text><text class="smalltxt" x="62" y="354">Raw text, images, slash commands</text>
+          <rect class="box" x="355" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="377" y="330">6. Conversation stream</text><text class="smalltxt" x="377" y="354">input hooks, /skill, /template</text>
+          <rect class="box" x="670" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="692" y="330">7. before_agent_start</text><text class="smalltxt" x="692" y="354">Add messages or modify</text><text class="smalltxt" x="692" y="372">system prompt this turn</text>
+          <path class="line" d="M290 345 H355"></path><path class="line" d="M605 345 H670"></path><path class="line" d="M480 250 V300"></path>
+          <rect class="box accent" x="180" y="470" width="280" height="108" rx="12"></rect><text class="txt" x="202" y="500">8. Final model request</text><text class="smalltxt" x="202" y="524">instruction + conversation</text><text class="smalltxt" x="202" y="542">+ current user message</text><text class="smalltxt" x="202" y="560">+ active tool schemas</text>
+          <rect class="box" x="550" y="470" width="280" height="108" rx="12"></rect><text class="txt" x="572" y="500">9. Tool loop</text><text class="smalltxt" x="572" y="524">tool hooks → execute tool</text><text class="smalltxt" x="572" y="542">append result → call model again</text>
+          <path class="line" d="M795 390 V424 H320 V470"></path><path class="line" d="M460 524 H550"></path><path class="line" d="M690 470 C690 420 520 420 520 470"></path>
         </svg>
 
-        <details open>
-          <summary>Step-by-step details</summary>
-          <ol>
-            <li><strong>Startup/reload:</strong> pi loads settings, packages, extensions, skills, prompt templates, themes, context files, <code>SYSTEM.md</code>, and <code>APPEND_SYSTEM.md</code>.</li>
-            <li><strong>Extensions register capabilities:</strong> tools, commands, flags, input hooks, tool hooks, and <code>before_agent_start</code> hooks.</li>
-            <li><strong>Active tools are selected:</strong> usually <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>, but extensions like plan-mode can change them.</li>
-            <li><strong>Base system prompt is built:</strong> default prompt or <code>SYSTEM.md</code>, plus appended system text, project context, skills, current date, and working directory.</li>
-            <li><strong>User input is processed:</strong> extension commands may handle it directly; input hooks may transform it; <code>/skill:name</code> and prompt templates are expanded.</li>
-            <li><strong>Before model call:</strong> <code>before_agent_start</code> hooks can inject custom messages or modify the system prompt for this turn.</li>
-            <li><strong>Model receives:</strong> effective system prompt, conversation history, current user message, extension messages, and active tool schemas.</li>
-            <li><strong>Tool loop:</strong> model tool calls are intercepted by hooks, executed, appended as tool results, then sent back to the model until the assistant finishes.</li>
-          </ol>
+        <details>
+          <summary>1–4. Resource loading and base system prompt</summary>
+          <p>On startup or <code>/reload</code>, pi discovers resources and keeps them available in memory for later: settings, packages, extensions, skills, prompt templates, themes, context files, <code>SYSTEM.md</code>, and <code>APPEND_SYSTEM.md</code>.</p>
+          <p>Prompt templates are discovered here so slash commands such as <code>/review</code> are ready. Skills are also discovered; their metadata can be advertised in the system prompt, while full skill content is usually loaded later when explicitly invoked or read.</p>
+          <p>The base system prompt starts with exactly one of these:</p>
+          <pre><code>built-in default prompt
+OR
+SYSTEM.md</code></pre>
+          <p>If <code>SYSTEM.md</code> exists, it totally replaces the built-in default prompt. After that, pi appends content in this order:</p>
+          <pre><code>1. built-in default prompt OR SYSTEM.md
+2. APPEND_SYSTEM.md / --append-system-prompt
+3. AGENTS.md / CLAUDE.md project context
+4. available skills list, if read tool is active
+5. Current date
+6. Current working directory</code></pre>
+          <p><strong>Append</strong> means extra system-level instructions added without replacing the base prompt. Use <code>APPEND_SYSTEM.md</code> for extra global/project rules; use <code>AGENTS.md</code> for repo/project guidance.</p>
         </details>
 
         <details>
-          <summary>Where different customization types enter the token stream</summary>
+          <summary>5–7. User input expansion and extension hooks</summary>
+          <p>User input is processed before the model call:</p>
+          <ol>
+            <li>If it is an extension command such as <code>/plan</code>, the extension may handle it directly and no model call is required.</li>
+            <li><code>input</code> hooks can transform or handle the raw text/images.</li>
+            <li><code>/skill:name args</code> expands into a user message containing the full skill body plus args.</li>
+            <li>Prompt templates such as <code>/review foo</code> expand into normal user-message text.</li>
+            <li><code>before_agent_start</code> hooks can add custom messages or modify the effective system prompt for this turn.</li>
+          </ol>
+          <p>Important: <code>/skill</code> and prompt templates modify the <strong>conversation/user-message stream</strong>, not the base system prompt.</p>
+        </details>
+
+        <details>
+          <summary>8. Final model request</summary>
+          <p>The final request is structured, not one flat string. Conceptually:</p>
+          <pre><code>{
+  system: "effective system prompt",
+  messages: [
+    previous user messages,
+    previous assistant messages,
+    previous tool calls,
+    previous tool results,
+    current expanded user message,
+    extension-injected custom messages
+  ],
+  tools: [
+    read schema,
+    bash schema,
+    edit schema,
+    write schema,
+    extension tool schemas
+  ]
+}</code></pre>
+          <p>All of these contribute to input tokens: system prompt, conversation history, current user message, custom messages, active tool schemas, and previous tool results. If the conversation grows too large, older history may be compacted/summarized depending on session behavior.</p>
+        </details>
+
+        <details>
+          <summary>9. Tool loop</summary>
+          <p>When the model wants to inspect or modify the workspace, it emits tool calls. Pi executes them and sends the result back to the model in another model call.</p>
+          <pre><code>model asks for read(package.json)
+→ pi emits tool_call hooks
+→ extension may allow/block/modify
+→ pi executes read
+→ tool result is appended to conversation
+→ model is called again with the result
+→ repeat until assistant finishes</code></pre>
+          <p>Extensions can intercept this loop to block dangerous bash commands, restrict tools in plan mode, ask for confirmation, log usage, modify inputs, or customize rendering.</p>
+        </details>
+
+        <details>
+          <summary>Where each customization enters the token stream</summary>
           <table>
             <thead><tr><th>Source</th><th>Where it enters</th></tr></thead>
             <tbody>
               <tr><td><code>AGENTS.md</code> / <code>CLAUDE.md</code></td><td>Appended as project context in the system prompt.</td></tr>
               <tr><td><code>SYSTEM.md</code></td><td>Replaces the built-in default system prompt.</td></tr>
-              <tr><td><code>APPEND_SYSTEM.md</code></td><td>Appended to the system prompt.</td></tr>
+              <tr><td><code>APPEND_SYSTEM.md</code></td><td>Appended to the system prompt after the base prompt.</td></tr>
               <tr><td>Prompt template</td><td>Expands the user message before the model call.</td></tr>
               <tr><td><code>/skill:name</code></td><td>Reads the full skill and injects it into the user message.</td></tr>
               <tr><td>Available skills list</td><td>Advertised in the system prompt when the read tool is active.</td></tr>
@@ -396,9 +428,8 @@ Current working directory: /Users/won/code/won/pi</code></pre>
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
-
       <section id="interactive" class="doc-section" data-search="interactive usage slash commands at file reference bang shell command model settings resume new">
-        <h2>6. Interactive usage basics</h2>
+        <h2>Interactive usage basics</h2>
         <ul class="quick-list">
           <li>Type normal requests in the terminal editor.</li>
           <li>Use <code>@</code> to reference project files.</li>
@@ -411,7 +442,7 @@ Current working directory: /Users/won/code/won/pi</code></pre>
       </section>
 
       <section id="customization-map" class="doc-section" data-search="customization map extensions skills prompt templates themes packages settings context">
-        <h2>7. Customization map</h2>
+        <h2>Customization map</h2>
         <div class="summary">
           <div class="card"><h3>Extensions</h3><p>TypeScript code that registers commands, tools, events, UI, providers, and behavior changes.</p></div>
           <div class="card"><h3>Skills</h3><p>On-demand capability packages: instructions plus optional scripts/assets.</p></div>
@@ -424,7 +455,7 @@ Current working directory: /Users/won/code/won/pi</code></pre>
       </section>
 
       <section id="extensions" class="doc-section" data-search="extensions loading convention index ts default export ExtensionAPI registerCommand registerTool registerFlag events">
-        <h2>8. Extensions</h2>
+        <h2>Extensions</h2>
         <p>Extensions are auto-discovered by file/folder convention.</p>
         <table>
           <thead><tr><th>Location</th><th>Scope</th></tr></thead>
@@ -464,29 +495,119 @@ export default function myExtension(pi: ExtensionAPI): void {
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
-      <section id="plan-mode" class="doc-section" data-search="plan mode extension readonly exploration todos done markers bash allowlist">
-        <h2>9. Plan mode extension</h2>
-        <p>Project-local path:</p>
-        <pre><code>.pi/extensions/plan-mode/index.ts
-.pi/extensions/plan-mode/utils.ts
-.pi/extensions/plan-mode/README.md</code></pre>
+      <section id="extension-events" class="doc-section" data-search="extension events pi.on context before_agent_start tool_call tool_result session_start input user_bash provider turn message lifecycle">
+        <h2>Extension events</h2>
+        <p>Extensions listen to pi lifecycle events with <code>pi.on(eventName, handler)</code>. Events let extensions observe or modify resources, session behavior, prompt/message context, tool calls, UI state, and provider requests.</p>
+        <pre><code>pi.on("tool_call", async (event, ctx) =&gt; {
+  if (event.toolName === "bash") {
+    // inspect, mutate, or block the tool call
+  }
+});</code></pre>
+
         <details open>
-          <summary>What it does</summary>
-          <ol>
-            <li><strong>Plan mode</strong>: restrict tools to read-only exploration.</li>
-            <li><strong>Bash allowlist</strong>: allow safe commands like <code>ls</code>, <code>grep</code>, <code>find</code>, <code>git diff</code>.</li>
-            <li><strong>Plan extraction</strong>: parse numbered steps from a <code>Plan:</code> section.</li>
-            <li><strong>Execution mode</strong>: restore normal tools and track progress.</li>
-            <li><strong>Completion markers</strong>: assistant marks steps with <code>[DONE:n]</code>.</li>
-            <li><strong>UI progress</strong>: footer/status widget displays progress.</li>
-          </ol>
+          <summary>Event groups</summary>
+          <table>
+            <thead><tr><th>Group</th><th>Events</th><th>Use for</th></tr></thead>
+            <tbody>
+              <tr><td>Resources</td><td><code>resources_discover</code></td><td>Add dynamic skill/prompt/theme paths during startup or reload.</td></tr>
+              <tr><td>Session</td><td><code>session_start</code>, <code>session_before_switch</code>, <code>session_before_fork</code>, <code>session_before_compact</code>, <code>session_compact</code>, <code>session_shutdown</code>, <code>session_before_tree</code>, <code>session_tree</code></td><td>Restore state, cancel session changes, customize compaction/tree navigation, clean up on shutdown.</td></tr>
+              <tr><td>Prompt/context/provider</td><td><code>context</code>, <code>before_agent_start</code>, <code>before_provider_request</code>, <code>after_provider_response</code></td><td>Filter model messages, inject hidden context, alter per-turn system prompt, inspect/replace provider payloads.</td></tr>
+              <tr><td>Agent/message lifecycle</td><td><code>agent_start</code>, <code>agent_end</code>, <code>turn_start</code>, <code>turn_end</code>, <code>message_start</code>, <code>message_update</code>, <code>message_end</code></td><td>Track progress, update UI, inspect streaming messages, modify finalized messages.</td></tr>
+              <tr><td>Tools</td><td><code>tool_call</code>, <code>tool_result</code>, <code>tool_execution_start</code>, <code>tool_execution_update</code>, <code>tool_execution_end</code></td><td>Block or mutate tool calls, modify results, observe execution progress.</td></tr>
+              <tr><td>Model/settings</td><td><code>model_select</code>, <code>thinking_level_select</code></td><td>React when model or thinking level changes.</td></tr>
+              <tr><td>User input/shell</td><td><code>input</code>, <code>user_bash</code></td><td>Transform user input, handle custom syntax, intercept <code>!</code>/<code>!!</code> bash commands.</td></tr>
+            </tbody>
+          </table>
         </details>
-        <p>Commands: <code>/plan</code>, <code>/todos</code>, <code>Ctrl+Alt+P</code>.</p>
+
+
+        <details>
+          <summary>Full event reference: each event explained</summary>
+          <table>
+            <thead><tr><th>Event</th><th>When it fires</th><th>Common use</th></tr></thead>
+            <tbody>
+              <tr><td><code>resources_discover</code></td><td>During startup or reload while resources are discovered.</td><td>Dynamically contribute skill, prompt-template, or theme paths.</td></tr>
+              <tr><td><code>session_start</code></td><td>When a session starts, reloads, resumes, forks, or is newly created.</td><td>Initialize UI/state, restore persisted extension state, inspect startup reason.</td></tr>
+              <tr><td><code>session_before_switch</code></td><td>Before switching to a new/resumed session.</td><td>Cancel switching, e.g. if git repo is dirty.</td></tr>
+              <tr><td><code>session_before_fork</code></td><td>Before forking from an entry in the session tree.</td><td>Cancel fork or skip conversation restore.</td></tr>
+              <tr><td><code>session_before_compact</code></td><td>Before conversation context compaction.</td><td>Cancel compaction or provide custom compaction result/instructions.</td></tr>
+              <tr><td><code>session_compact</code></td><td>After compaction completes.</td><td>Observe/log compaction result or update UI/state.</td></tr>
+              <tr><td><code>session_shutdown</code></td><td>Before extension runtime is torn down due to quit/reload/session replacement.</td><td>Clean up timers, watchers, handles, background processes.</td></tr>
+              <tr><td><code>session_before_tree</code></td><td>Before navigating the session tree.</td><td>Cancel or customize branch summary/tree navigation behavior.</td></tr>
+              <tr><td><code>session_tree</code></td><td>After navigating the session tree.</td><td>React to new leaf/branch summary after navigation.</td></tr>
+              <tr><td><code>context</code></td><td>Before each LLM call when message context is prepared.</td><td>Filter or replace conversation messages sent to the model.</td></tr>
+              <tr><td><code>before_agent_start</code></td><td>After user prompt expansion, before the agent loop starts.</td><td>Inject hidden/custom messages or modify the system prompt for this turn.</td></tr>
+              <tr><td><code>before_provider_request</code></td><td>Right before the raw provider request is sent.</td><td>Inspect, log, or replace provider payload.</td></tr>
+              <tr><td><code>after_provider_response</code></td><td>After provider response arrives, before stream is consumed.</td><td>Inspect response status/headers, logging/diagnostics.</td></tr>
+              <tr><td><code>agent_start</code></td><td>When an agent loop begins.</td><td>Update UI/status or start timers.</td></tr>
+              <tr><td><code>agent_end</code></td><td>When an agent loop ends.</td><td>Post-run UI, summaries, notifications, follow-up prompts.</td></tr>
+              <tr><td><code>turn_start</code></td><td>At the start of each agent turn/model iteration.</td><td>Track turn index/timing.</td></tr>
+              <tr><td><code>turn_end</code></td><td>At the end of each turn, with assistant message and tool results.</td><td>Track progress markers, inspect final turn output.</td></tr>
+              <tr><td><code>message_start</code></td><td>When a user/assistant/tool-result message starts.</td><td>Observe message lifecycle and update UI.</td></tr>
+              <tr><td><code>message_update</code></td><td>During assistant message streaming.</td><td>Inspect token-by-token/streaming updates.</td></tr>
+              <tr><td><code>message_end</code></td><td>When a message is finalized.</td><td>Replace finalized message while keeping same role.</td></tr>
+              <tr><td><code>tool_call</code></td><td>Before a tool executes.</td><td>Block dangerous calls or mutate tool input.</td></tr>
+              <tr><td><code>tool_result</code></td><td>After a tool executes.</td><td>Modify tool result content/details/error state before model sees it.</td></tr>
+              <tr><td><code>tool_execution_start</code></td><td>When tool execution starts.</td><td>Observe/log tool start, update UI.</td></tr>
+              <tr><td><code>tool_execution_update</code></td><td>During tool execution with partial output.</td><td>Stream progress/output to UI or logs.</td></tr>
+              <tr><td><code>tool_execution_end</code></td><td>When tool execution finishes.</td><td>Observe result/error and timing.</td></tr>
+              <tr><td><code>model_select</code></td><td>When the selected model changes.</td><td>Update status UI or enforce model-specific behavior.</td></tr>
+              <tr><td><code>thinking_level_select</code></td><td>When thinking level changes.</td><td>Update UI or adapt extension behavior.</td></tr>
+              <tr><td><code>user_bash</code></td><td>When user runs <code>!command</code> or <code>!!command</code>.</td><td>Override shell execution or provide custom result.</td></tr>
+              <tr><td><code>input</code></td><td>When user input is received, before command/template/agent processing.</td><td>Transform input, implement custom syntax, or handle input without model call.</td></tr>
+            </tbody>
+          </table>
+        </details>
+        <details>
+          <summary>High-impact events to understand first</summary>
+          <table>
+            <thead><tr><th>Event</th><th>When it fires</th><th>Can return</th></tr></thead>
+            <tbody>
+              <tr><td><code>input</code></td><td>When user input is received, before skill/template expansion and agent processing.</td><td><code>{ action: "continue" }</code>, <code>{ action: "transform", text }</code>, or <code>{ action: "handled" }</code>.</td></tr>
+              <tr><td><code>before_agent_start</code></td><td>After user prompt expansion, before the agent loop starts.</td><td>A hidden/custom message and/or a per-turn <code>systemPrompt</code>.</td></tr>
+              <tr><td><code>context</code></td><td>Before each LLM call, when message context is being prepared.</td><td><code>{ messages }</code> to replace/filter conversation messages.</td></tr>
+              <tr><td><code>tool_call</code></td><td>Before a tool executes.</td><td><code>{ block: true, reason }</code>; can also mutate <code>event.input</code> in place.</td></tr>
+              <tr><td><code>tool_result</code></td><td>After a tool executes.</td><td>Replacement <code>content</code>, <code>details</code>, or <code>isError</code>.</td></tr>
+              <tr><td><code>turn_end</code></td><td>After an assistant turn finishes.</td><td>Usually observe-only; good for progress tracking like <code>[DONE:n]</code>.</td></tr>
+              <tr><td><code>agent_end</code></td><td>When the agent loop finishes.</td><td>Usually observe/UI follow-up; useful for post-run summaries, prompts, or UI actions.</td></tr>
+              <tr><td><code>session_start</code></td><td>When a session starts, resumes, reloads, forks, or is newly created.</td><td>Usually observe-only; good for restoring extension state.</td></tr>
+            </tbody>
+          </table>
+        </details>
+
+        <details>
+          <summary>Examples</summary>
+          <p>Block dangerous bash:</p>
+          <pre><code>pi.on("tool_call", async (event) =&gt; {
+  if (event.toolName === "bash" && event.input.command.includes("rm -rf")) {
+    return { block: true, reason: "Blocked dangerous command" };
+  }
+});</code></pre>
+          <p>Inject hidden context before the agent starts:</p>
+          <pre><code>pi.on("before_agent_start", async () =&gt; {
+  return {
+    message: {
+      customType: "my-hidden-context",
+      content: "Extra instructions for this turn",
+      display: false,
+    },
+  };
+});</code></pre>
+          <p>Filter stale context messages:</p>
+          <pre><code>pi.on("context", async (event) =&gt; {
+  return {
+    messages: event.messages.filter((m) =&gt; m.customType !== "stale-context"),
+  };
+});</code></pre>
+        </details>
+
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
+
+
       <section id="skills" class="doc-section" data-search="skills SKILL md agent capability manual workflows scripts assets skill command">
-        <h2>10. Skills</h2>
+        <h2>Skills</h2>
         <p>Skills are self-contained instructions loaded on demand. They are useful for reusable workflows that do not need runtime TypeScript hooks.</p>
         <pre><code>.pi/skills/my-skill/SKILL.md</code></pre>
         <p>Use with:</p>
@@ -497,7 +618,7 @@ export default function myExtension(pi: ExtensionAPI): void {
       </section>
 
       <section id="prompts" class="doc-section" data-search="prompt templates prompts markdown slash command arguments ARGUMENTS review">
-        <h2>11. Prompt templates</h2>
+        <h2>Prompt templates</h2>
         <p>Prompt templates are Markdown files under <code>.pi/prompts/</code>. The filename becomes a slash command.</p>
         <pre><code>.pi/prompts/review.md   =&gt;   /review</code></pre>
         <details open>
@@ -518,7 +639,7 @@ Check:
       </section>
 
       <section id="skills-vs-prompts" class="doc-section" data-search="skills vs prompts prompt template for me skill for agent user macro capability manual">
-        <h2>12. Skills vs prompt templates</h2>
+        <h2>Skills vs prompt templates</h2>
         <div class="note">Simple mental model: <strong>prompt templates are for you</strong>; <strong>skills are for the agent</strong>.</div>
         <table>
           <thead><tr><th>Resource</th><th>Mental model</th><th>Use when...</th></tr></thead>
@@ -534,7 +655,7 @@ Extension:       runtime code that changes pi behavior</code></pre>
       </section>
 
       <section id="themes" class="doc-section" data-search="themes json colors tui settings">
-        <h2>13. Themes</h2>
+        <h2>Themes</h2>
         <p>Themes are JSON color definitions for the TUI.</p>
         <pre><code>.pi/themes/my-theme.json</code></pre>
         <p>Select via <code>/settings</code> or settings JSON:</p>
@@ -545,7 +666,7 @@ Extension:       runtime code that changes pi behavior</code></pre>
       </section>
 
       <section id="settings" class="doc-section" data-search="settings json global project model provider theme packages skills prompts">
-        <h2>14. Settings</h2>
+        <h2>Settings</h2>
         <table>
           <thead><tr><th>File</th><th>Purpose</th></tr></thead>
           <tbody>
@@ -558,7 +679,7 @@ Extension:       runtime code that changes pi behavior</code></pre>
       </section>
 
       <section id="context" class="doc-section" data-search="context files AGENTS md project instructions build test style architecture safety">
-        <h2>15. Context files</h2>
+        <h2>Context files</h2>
         <p>Context files such as <code>AGENTS.md</code> give pi project-specific instructions: coding style, commands, test strategy, architecture notes, and repository conventions.</p>
         <ul>
           <li>How to build and test the project.</li>
@@ -571,7 +692,7 @@ Extension:       runtime code that changes pi behavior</code></pre>
       </section>
 
       <section id="packages" class="doc-section" data-search="pi packages npm git bundle extensions skills prompts themes share install">
-        <h2>16. Pi packages</h2>
+        <h2>Pi packages</h2>
         <p>Pi packages bundle extensions, skills, prompt templates, and themes so they can be shared via npm, git, URL, or local path.</p>
         <pre><code>pi install npm:@scope/package
 pi install git:github.com/user/repo
@@ -580,8 +701,129 @@ pi install ./local-package</code></pre>
         <a class="top-link" href="#top">Back to top</a>
       </section>
 
+      <section id="plan-mode" class="doc-section" data-search="plan mode extension readonly exploration todos done markers bash allowlist">
+        <h2>Plan mode example study</h2>
+        <p>Project-local path:</p>
+        <pre><code>.pi/extensions/plan-mode/index.ts
+.pi/extensions/plan-mode/utils.ts
+.pi/extensions/plan-mode/README.md</code></pre>
+        <details open>
+          <summary>What it does</summary>
+          <ol>
+            <li><strong>Plan mode</strong>: restrict tools to read-only exploration.</li>
+            <li><strong>Bash allowlist</strong>: allow safe commands like <code>ls</code>, <code>grep</code>, <code>find</code>, <code>git diff</code>.</li>
+            <li><strong>Plan extraction</strong>: parse numbered steps from a <code>Plan:</code> section.</li>
+            <li><strong>Execution mode</strong>: restore normal tools and track progress.</li>
+            <li><strong>Completion markers</strong>: assistant marks steps with <code>[DONE:n]</code>.</li>
+            <li><strong>UI progress</strong>: footer/status widget displays progress.</li>
+          </ol>
+        </details>
+        <p>Commands: <code>/plan</code>, <code>/todos</code>, <code>Ctrl+Alt+P</code>.</p>
+        <details>
+          <summary>Study findings and gotchas</summary>
+          <table>
+            <thead><tr><th>Finding</th><th>Why it matters</th></tr></thead>
+            <tbody>
+              <tr><td><code>/plan</code> toggles mode and resets todos</td><td>The example clears <code>todoItems</code> whenever plan mode is toggled, so toggling is not just a view change.</td></tr>
+              <tr><td><code>setActiveTools()</code> replaces active tools</td><td>Plan mode uses hard-coded tool lists. It does not merge with tools activated by other extensions.</td></tr>
+              <tr><td>Other extension tools can be deactivated</td><td>If another extension registered/activated custom tools, toggling plan mode can hide them from the model until restored manually.</td></tr>
+              <tr><td><code>NORMAL_MODE_TOOLS</code> is hard-coded</td><td>Disabling plan mode restores only <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>, not necessarily the user's previous active tool set.</td></tr>
+              <tr><td><code>grep</code>, <code>find</code>, <code>ls</code> are built-in but not default active</td><td>Pi knows these tools, so plan mode can activate them even though normal coding mode usually starts with <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>.</td></tr>
+              <tr><td><code>questionnaire</code> is not built-in</td><td>It comes from a separate example extension. If that extension is not loaded, the name is ignored by <code>setActiveTools()</code>.</td></tr>
+              <tr><td>Registered tools vs active tools</td><td>Plan mode changes active tools. It does not create, delete, or unregister tools.</td></tr>
+            </tbody>
+          </table>
+          <p>A more robust plan-mode implementation would save <code>pi.getActiveTools()</code> before enabling plan mode and restore that exact list when disabling it.</p>
+        </details>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
+      <section id="example-extensions" class="doc-section" data-search="example extensions pi examples commands tools ui hooks providers games safety plan mode subagent custom provider">
+        <h2>Example extensions catalog</h2>
+        <p>Pi ships many example extensions under <code>examples/extensions/</code>. They are useful study material because each one demonstrates a different extension capability.</p>
+        <div class="note">Study tip: start with <code>hello.ts</code>, <code>commands.ts</code>, <code>permission-gate.ts</code>, <code>plan-mode/</code>, then UI examples like <code>status-line.ts</code> or <code>question.ts</code>.</div>
+        <details>
+          <summary>All example extensions: what they do and how they work</summary>
+<table><thead><tr><th>Example</th><th>What it does</th><th>How it works</th></tr></thead><tbody>
+<tr><td><code>hello.ts</code></td><td>Minimal custom tool example</td><td>Registers a simple model-callable tool to demonstrate tool definition basics.</td></tr>
+<tr><td><code>commands.ts</code></td><td>List available slash commands</td><td>Uses pi.getCommands() and registers /commands.</td></tr>
+<tr><td><code>tools.ts</code></td><td>Enable/disable tools interactively</td><td>Registers /tools and persists selected active tools across reloads/branches.</td></tr>
+<tr><td><code>dynamic-tools.ts</code></td><td>Register tools at runtime</td><td>Adds tools during session_start and later through a command.</td></tr>
+<tr><td><code>tool-override.ts</code></td><td>Override built-in tools</td><td>Registers a tool with the same name as a built-in tool to replace behavior/rendering.</td></tr>
+<tr><td><code>structured-output.ts</code></td><td>End on structured tool call</td><td>Uses terminate: true so the agent can finish with a tool result without extra LLM turn.</td></tr>
+<tr><td><code>truncated-tool.ts</code></td><td>Safe custom tool output truncation</td><td>Demonstrates truncating large tool output before it enters model context.</td></tr>
+<tr><td><code>todo.ts</code></td><td>LLM-managed todo list</td><td>Registers a todo tool and /todos command; persists state via session entries.</td></tr>
+<tr><td><code>question.ts</code></td><td>Ask one structured question</td><td>Registers an interactive custom UI tool for one question/options.</td></tr>
+<tr><td><code>questionnaire.ts</code></td><td>Ask multiple structured questions</td><td>Registers a multi-question custom UI tool with tab navigation.</td></tr>
+<tr><td><code>qna.ts</code></td><td>Extract questions from assistant output</td><td>Uses /qna to analyze last assistant message and show answer UI.</td></tr>
+<tr><td><code>permission-gate.ts</code></td><td>Confirm dangerous bash commands</td><td>Intercepts tool_call for bash and asks before rm -rf/sudo/chmod-like commands.</td></tr>
+<tr><td><code>protected-paths.ts</code></td><td>Block edits/writes to sensitive paths</td><td>Intercepts write/edit tool calls and blocks configured protected paths.</td></tr>
+<tr><td><code>confirm-destructive.ts</code></td><td>Confirm destructive session actions</td><td>Uses before-session events to cancel clear/switch/branch unless confirmed.</td></tr>
+<tr><td><code>dirty-repo-guard.ts</code></td><td>Prevent switching with dirty git repo</td><td>Checks git status before session changes and blocks when uncommitted changes exist.</td></tr>
+<tr><td><code>auto-commit-on-exit.ts</code></td><td>Commit changes on exit</td><td>Uses lifecycle/session exit hook and last assistant message to generate git commit.</td></tr>
+<tr><td><code>git-checkpoint.ts</code></td><td>Stash checkpoints each turn</td><td>Creates git stash checkpoints and restores them when forking session history.</td></tr>
+<tr><td><code>sandbox/</code></td><td>Sandbox bash commands</td><td>Wraps bash execution with OS-level sandbox restrictions for filesystem/network.</td></tr>
+<tr><td><code>plan-mode/</code></td><td>Read-only planning mode</td><td>Registers /plan, restricts tools/bash allowlist, extracts plan steps, tracks [DONE:n].</td></tr>
+<tr><td><code>preset.ts</code></td><td>Named mode presets</td><td>Loads preset config that changes model, thinking level, tools, and system prompt additions.</td></tr>
+<tr><td><code>minimal-mode.ts</code></td><td>Minimal tool display mode</td><td>Overrides rendering of built-in tool calls/results for compact UI.</td></tr>
+<tr><td><code>inline-bash.ts</code></td><td>Inline shell expansion in prompts</td><td>Uses input hook to replace inline shell expressions with command output.</td></tr>
+<tr><td><code>input-transform.ts</code></td><td>Input event demo</td><td>Uses input hook to intercept, transform, or handle user input before expansion.</td></tr>
+<tr><td><code>file-trigger.ts</code></td><td>External file-to-agent trigger</td><td>Watches a trigger file and injects its content as messages.</td></tr>
+<tr><td><code>send-user-message.ts</code></td><td>Send user messages from extension</td><td>Uses pi.sendUserMessage() to enqueue real user messages programmatically.</td></tr>
+<tr><td><code>reload-runtime.ts</code></td><td>Reload from command/tool</td><td>Uses ctx.reload() and a tool/follow-up command to trigger runtime reload.</td></tr>
+<tr><td><code>trigger-compact.ts</code></td><td>Trigger compaction</td><td>Demonstrates invoking/session compaction behavior from an extension.</td></tr>
+<tr><td><code>custom-compaction.ts</code></td><td>Replace compaction behavior</td><td>Overrides default compaction with custom full-context summary logic.</td></tr>
+<tr><td><code>summarize.ts</code></td><td>Conversation summary command</td><td>Adds command/tooling to summarize conversation context.</td></tr>
+<tr><td><code>handoff.ts</code></td><td>Create focused new session</td><td>Extracts useful context and starts a new session instead of lossy compaction.</td></tr>
+<tr><td><code>pirate.ts</code></td><td>Dynamic system prompt mode</td><td>Uses before_agent_start to append pirate instructions when enabled.</td></tr>
+<tr><td><code>prompt-customizer.ts</code></td><td>Context-aware prompt modification</td><td>Inspects systemPromptOptions and modifies system prompt without rediscovering resources.</td></tr>
+<tr><td><code>system-prompt-header.ts</code></td><td>Show system prompt length</td><td>Uses ctx.getSystemPrompt() and UI status/widget to display prompt size.</td></tr>
+<tr><td><code>claude-rules.ts</code></td><td>Expose .claude/rules to agent</td><td>Scans rules directory and appends available rule list to system prompt.</td></tr>
+<tr><td><code>hidden-thinking-label.ts</code></td><td>Customize hidden thinking label</td><td>Uses ctx.ui.setHiddenThinkingLabel().</td></tr>
+<tr><td><code>working-indicator.ts</code></td><td>Customize streaming indicator</td><td>Uses ctx.ui.setWorkingIndicator() while agent is working.</td></tr>
+<tr><td><code>working-message-test.ts</code></td><td>Persist working message test</td><td>Sets custom working message/indicator at session start to test persistence.</td></tr>
+<tr><td><code>titlebar-spinner.ts</code></td><td>Terminal title spinner</td><td>Uses ctx.ui.setTitle() repeatedly while agent is working.</td></tr>
+<tr><td><code>notify.ts</code></td><td>Native terminal notification</td><td>Sends terminal notification when agent finishes and waits for input.</td></tr>
+<tr><td><code>status-line.ts</code></td><td>Footer status text</td><td>Uses ctx.ui.setStatus() to show persistent footer status.</td></tr>
+<tr><td><code>model-status.ts</code></td><td>Show model changes</td><td>Uses model_select hook and footer status.</td></tr>
+<tr><td><code>custom-footer.ts</code></td><td>Replace/customize footer</td><td>Uses ctx.ui.setFooter() with git/model/status data.</td></tr>
+<tr><td><code>custom-header.ts</code></td><td>Replace startup header</td><td>Uses ctx.ui.setHeader() to render custom header component.</td></tr>
+<tr><td><code>border-status-editor.ts</code></td><td>Editor border/status customization</td><td>Demonstrates editor/status visual customization.</td></tr>
+<tr><td><code>rainbow-editor.ts</code></td><td>Animated editor highlight</td><td>Customizes editor rendering/highlighting for special words.</td></tr>
+<tr><td><code>modal-editor.ts</code></td><td>Vim-like modal editor</td><td>Replaces/enhances editor behavior with normal/insert modes and keybindings.</td></tr>
+<tr><td><code>widget-placement.ts</code></td><td>Widget positioning demo</td><td>Demonstrates where extension widgets can be placed.</td></tr>
+<tr><td><code>message-renderer.ts</code></td><td>Custom message rendering</td><td>Registers message renderer for custom messages with formatting/details.</td></tr>
+<tr><td><code>built-in-tool-renderer.ts</code></td><td>Custom built-in tool rendering</td><td>Overrides display of read/bash/edit/write without changing tool behavior.</td></tr>
+<tr><td><code>overlay-test.ts</code></td><td>Overlay UI demo</td><td>Shows floating overlay with inline inputs to test compositing.</td></tr>
+<tr><td><code>overlay-qa-tests.ts</code></td><td>Overlay edge-case tests</td><td>Provides commands for animation/positioning/edge-case QA.</td></tr>
+<tr><td><code>doom-overlay/</code></td><td>DOOM as overlay</td><td>Uses custom overlay UI and keyboard handling to run DOOM.</td></tr>
+<tr><td><code>snake.ts</code></td><td>Snake game</td><td>Registers /snake custom UI game.</td></tr>
+<tr><td><code>space-invaders.ts</code></td><td>Space Invaders game</td><td>Registers /invaders using keyboard press/release handling.</td></tr>
+<tr><td><code>tic-tac-toe.ts</code></td><td>Tic-tac-toe game/tool</td><td>User plays via UI; agent plays via sequential execution tool.</td></tr>
+<tr><td><code>timed-confirm.ts</code></td><td>Timed dialogs</td><td>Shows confirm/select dialogs with live countdown/autocancel.</td></tr>
+<tr><td><code>event-bus.ts</code></td><td>Inter-extension communication</td><td>Uses pi.events to emit/listen between extensions.</td></tr>
+<tr><td><code>bookmark.ts</code></td><td>Label session entries</td><td>Uses setLabel so important entries are easier to find in /tree.</td></tr>
+<tr><td><code>session-name.ts</code></td><td>Friendly session names</td><td>Uses setSessionName/getSessionName.</td></tr>
+<tr><td><code>shutdown-command.ts</code></td><td>Clean shutdown command</td><td>Registers /quit and calls ctx.shutdown().</td></tr>
+<tr><td><code>rpc-demo.ts</code></td><td>RPC extension UI demo</td><td>Exercises extension UI methods for RPC integrations.</td></tr>
+<tr><td><code>bash-spawn-hook.ts</code></td><td>Modify bash spawn context</td><td>Uses bash spawn hook to adjust command, cwd, or environment before execution.</td></tr>
+<tr><td><code>interactive-shell.ts</code></td><td>Run interactive terminal commands</td><td>Suspends TUI and gives full terminal control to interactive commands.</td></tr>
+<tr><td><code>ssh.ts</code></td><td>Remote SSH execution</td><td>Delegates read/write/edit/bash operations to a remote machine over SSH.</td></tr>
+<tr><td><code>provider-payload.ts</code></td><td>Inspect/modify provider request payload</td><td>Hooks provider payload before request, e.g. logging/changing temperature.</td></tr>
+<tr><td><code>custom-provider-anthropic/</code></td><td>Custom Anthropic-like provider</td><td>Registers custom provider, streaming implementation, and OAuth behavior.</td></tr>
+<tr><td><code>custom-provider-gitlab-duo/</code></td><td>GitLab Duo provider</td><td>Registers provider that delegates GitLab Duo AI Gateway to Anthropic/OpenAI streaming.</td></tr>
+<tr><td><code>github-issue-autocomplete.ts</code></td><td>GitHub issue autocomplete</td><td>Uses gh to preload issues and provide #issue completion.</td></tr>
+<tr><td><code>mac-system-theme.ts</code></td><td>Sync with macOS dark/light mode</td><td>Detects macOS appearance and switches pi theme.</td></tr>
+<tr><td><code>dynamic-resources/</code></td><td>Dynamic resources demo</td><td>Extension contributes skills/prompts/themes at runtime.</td></tr>
+<tr><td><code>with-deps/</code></td><td>Extension with npm dependencies</td><td>Shows extension-local package.json/node_modules dependency resolution.</td></tr>
+<tr><td><code>subagent/</code></td><td>Delegate to subagents</td><td>Registers a tool that spawns separate pi processes with specialized prompts/context.</td></tr>
+</tbody></table>
+        </details>
+        <a class="top-link" href="#top">Back to top</a>
+      </section>
+
       <section id="quick-reference" class="doc-section" data-search="quick reference goal use extensions skills prompts themes settings AGENTS">
-        <h2>17. Quick reference</h2>
+        <h2>Quick reference</h2>
         <table>
           <thead><tr><th>Goal</th><th>Use</th></tr></thead>
           <tbody>
@@ -598,7 +840,7 @@ pi install ./local-package</code></pre>
       </section>
 
       <section id="study-checklist" class="doc-section" data-search="study checklist learn extension skill prompt template AGENTS">
-        <h2>18. Study checklist</h2>
+        <h2>Study checklist</h2>
         <ul>
           <li>Understand default tools: read/write/edit/bash.</li>
           <li>Learn extension loading conventions.</li>

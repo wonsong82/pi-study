@@ -100,7 +100,7 @@
         </div>
         <div class="nav-group">
           <div class="nav-title">핵심</div>
-          <a href="#tools">기본 도구</a>
+          <a href="#tools">Built-in / active tools</a>
           <a href="#default-system-prompt">기본 시스템 프롬프트</a>
           <a href="#prompt-flow">프롬프트 생성 흐름</a>
           <a href="#interactive">인터랙티브 사용</a>
@@ -111,12 +111,17 @@
           <div class="nav-title">커스터마이징</div>
           <a href="#customization-map">커스터마이징 지도</a>
           <a href="#extensions">확장</a>
-          <a href="#plan-mode">Plan mode</a>
+          <a href="#extension-events">Extension events</a>
           <a href="#skills">스킬</a>
           <a href="#prompts">프롬프트 템플릿</a>
           <a href="#skills-vs-prompts">스킬 vs 프롬프트</a>
           <a href="#themes">테마</a>
           <a href="#packages">Pi 패키지</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">예제 학습</div>
+          <a href="#plan-mode">Plan mode 예제</a>
+          <a href="#example-extensions">예제 확장</a>
         </div>
         <div class="nav-group">
           <div class="nav-title">학습</div>
@@ -142,14 +147,14 @@
       <p id="no-results" class="no-results">일치하는 섹션이 없습니다. 다른 검색어를 입력해 보세요.</p>
 
       <section id="overview" class="doc-section" data-search="pi란 터미널 코딩 하네스 llm 도구 작업공간">
-        <h2>1. pi란?</h2>
+        <h2>pi란?</h2>
         <p><strong>pi</strong>는 최소주의 터미널 코딩 하네스입니다. LLM을 작업 디렉터리에 연결하고 모델에게 <code>read</code>, <code>write</code>, <code>edit</code>, <code>bash</code> 같은 도구를 제공합니다.</p>
         <p>모든 워크플로를 내장 기능으로 제공하기보다, 확장, 스킬, 프롬프트 템플릿, 테마, 패키지, 설정, 컨텍스트 파일로 사용자가 자신의 방식에 맞게 조정하는 구조입니다.</p>
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
       <section id="mental-model" class="doc-section" data-search="기억 모델 mental model prompt skill extension 나를 위한 에이전트 런타임 동작">
-        <h2>2. 기억 모델</h2>
+        <h2>기억 모델</h2>
         <div class="note"><strong>pi는 하네스</strong>, LLM은 추론 엔진, 도구는 손, 확장/스킬/템플릿은 pi에게 내 워크플로를 가르치는 방법입니다.</div>
         <table>
           <thead><tr><th>항목</th><th>이렇게 생각하기</th></tr></thead>
@@ -162,22 +167,38 @@
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
-      <section id="tools" class="doc-section" data-search="기본 도구 read write edit bash">
-        <h2>3. 기본 에이전트 도구</h2>
+      <section id="tools" class="doc-section" data-search="built in tools active tools registered tools read write edit bash grep find ls default agent tools 기본 도구 활성 도구 등록 도구">
+        <h2>Built-in and active tools</h2>
+        <p>pi에는 <strong>registered tools</strong>와 <strong>active tools</strong>의 구분이 있습니다.</p>
         <table>
-          <thead><tr><th>도구</th><th>용도</th></tr></thead>
+          <thead><tr><th>개념</th><th>의미</th></tr></thead>
           <tbody>
-            <tr><td><code>read</code></td><td>작업공간의 파일을 읽습니다.</td></tr>
-            <tr><td><code>write</code></td><td>파일을 생성하거나 전체 내용을 덮어씁니다.</td></tr>
-            <tr><td><code>edit</code></td><td>정확한 텍스트 치환 방식으로 파일을 패치합니다.</td></tr>
-            <tr><td><code>bash</code></td><td>테스트, 검색, git 명령 등 셸 명령을 실행합니다.</td></tr>
+            <tr><td><strong>Registered tools</strong></td><td>pi가 알고 있는 도구입니다. built-in일 수도 있고 extension이 제공한 도구일 수도 있습니다.</td></tr>
+            <tr><td><strong>Active tools</strong></td><td>현재 모델에게 callable tool schema로 전달되는 도구입니다.</td></tr>
           </tbody>
         </table>
+        <p>기본적으로 pi는 보통 아래 coding tools를 active 상태로 시작합니다.</p>
+        <pre><code>read, bash, edit, write</code></pre>
+        <p>하지만 pi에는 mode/extension이 활성화할 수 있는 추가 built-in read-only exploration tools도 있습니다.</p>
+        <pre><code>grep, find, ls</code></pre>
+        <table>
+          <thead><tr><th>Tool</th><th>Type</th><th>하는 일</th></tr></thead>
+          <tbody>
+            <tr><td><code>read</code></td><td>Default active</td><td>파일 내용을 읽습니다. 텍스트와 이미지를 지원하며, 큰 텍스트 출력은 잘리고 offset/limit로 이어서 읽을 수 있습니다.</td></tr>
+            <tr><td><code>bash</code></td><td>Default active</td><td>현재 작업 디렉터리에서 shell command를 실행합니다. 테스트, git, 검색, 스크립트, 프로젝트 명령에 유용합니다.</td></tr>
+            <tr><td><code>edit</code></td><td>Default active</td><td>정확한 텍스트 치환으로 기존 파일을 정밀하게 수정합니다. 작은 surgical modification에 적합합니다.</td></tr>
+            <tr><td><code>write</code></td><td>Default active</td><td>파일을 생성하거나 전체 내용을 덮어씁니다. 새 파일 또는 complete rewrite에 적합합니다.</td></tr>
+            <tr><td><code>grep</code></td><td>Built-in, not always active</td><td>파일 내용에서 패턴을 검색합니다. bash grep보다 구조적이며 project ignore behavior를 따릅니다.</td></tr>
+            <tr><td><code>find</code></td><td>Built-in, not always active</td><td>glob/pattern으로 파일을 찾습니다. shell command 없이 codebase를 탐색할 때 유용합니다.</td></tr>
+            <tr><td><code>ls</code></td><td>Built-in, not always active</td><td>디렉터리 내용을 나열합니다. 안전한 read-only exploration에 유용합니다.</td></tr>
+          </tbody>
+        </table>
+        <div class="note">예: plan-mode extension은 기본 coding mode가 보통 <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>만 active로 시작하더라도 <code>grep</code>, <code>find</code>, <code>ls</code>를 활성화합니다.</div>
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
       <section id="default-system-prompt" class="doc-section" data-search="기본 시스템 프롬프트 exact out of box instructions available tools guidelines pi documentation current date working directory">
-        <h2>4. 기본 시스템 프롬프트</h2>
+        <h2>기본 시스템 프롬프트</h2>
         <p>아래는 pi의 out-of-the-box 기본 시스템 프롬프트 형태입니다. 실제 effective prompt는 날짜, 작업 디렉터리, 설치 경로, 활성 도구, 컨텍스트 파일, 스킬, 확장에 따라 달라질 수 있습니다.</p>
         <details open>
           <summary>이 프로젝트/세션 기준 정확한 기본 프롬프트</summary>
@@ -215,9 +236,17 @@ Current working directory: /Users/won/code/won/pi</code></pre>
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
-      <section id="prompt-flow" class="doc-section" data-search="프롬프트 생성 흐름 input tokens system prompt AGENTS skills templates extensions before_agent_start tool schemas messages model request">
-        <h2>5. 프롬프트 생성 흐름</h2>
-        <p>pi는 사용자가 입력한 텍스트만 모델에게 보내지 않습니다. 실제 모델 입력은 effective system prompt, 대화 기록, 확장된 사용자 메시지, 확장이 주입한 메시지, 도구 스키마, 도구 결과가 합쳐져 만들어집니다.</p>
+      <section id="prompt-flow" class="doc-section" data-search="프롬프트 생성 흐름 input tokens system prompt AGENTS skills templates extensions before_agent_start tool schemas messages model request instruction stream conversation stream tool loop">
+        <h2>프롬프트 생성 흐름</h2>
+        <p>pi는 사용자가 입력한 텍스트만 모델에게 보내지 않습니다. 실제 요청은 세 가지 stream으로 조립됩니다.</p>
+        <table>
+          <thead><tr><th>Stream</th><th>포함 내용</th><th>예시</th></tr></thead>
+          <tbody>
+            <tr><td><strong>A. Instruction stream</strong></td><td>effective system/developer prompt.</td><td>기본 prompt 또는 <code>SYSTEM.md</code>, <code>APPEND_SYSTEM.md</code>, <code>AGENTS.md</code>, available skills list, date/cwd, extension prompt changes.</td></tr>
+            <tr><td><strong>B. Conversation stream</strong></td><td>모델에게 전달되는 messages.</td><td>이전 user/assistant messages, 확장된 현재 user message, extension custom messages, 이전 tool calls/results.</td></tr>
+            <tr><td><strong>C. Tool interface</strong></td><td>호출 가능한 tool definitions/schemas.</td><td><code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>, extension tools. 이것도 input token을 소비합니다.</td></tr>
+          </tbody>
+        </table>
 
         <div class="note">
           핵심 구분: <strong>AGENTS.md는 system prompt context에 들어가고</strong>, <strong>prompt template은 사용자 메시지를 바꾸며</strong>, <strong>skill은 system prompt에 목록으로 소개되고 필요 시 사용자 context로 로드되며</strong>, <strong>extension은 거의 모든 단계를 수정할 수 있습니다</strong>.
@@ -225,40 +254,87 @@ Current working directory: /Users/won/code/won/pi</code></pre>
 
         <svg viewBox="0 0 960 640" role="img" aria-label="Pi 프롬프트 생성 흐름 다이어그램" style="width:100%;height:auto;border:1px solid var(--border);border-radius:14px;background:var(--panel-2);margin:14px 0;">
           <defs><marker id="arrow-ko" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="currentColor"></path></marker></defs>
-          <style>
-            .box { fill: var(--panel); stroke: var(--border); stroke-width: 2; }
-            .accent { fill: color-mix(in srgb, var(--accent) 18%, var(--panel)); stroke: var(--accent); }
-            .warnbox { fill: color-mix(in srgb, var(--warn) 16%, var(--panel)); stroke: var(--warn); }
-            .txt { fill: var(--text); font: 600 15px system-ui, sans-serif; }
-            .smalltxt { fill: var(--muted); font: 12px system-ui, sans-serif; }
-            .line { stroke: var(--muted); stroke-width: 2; marker-end: url(#arrow-ko); fill: none; }
-          </style>
+          <style>.box{fill:var(--panel);stroke:var(--border);stroke-width:2}.accent{fill:color-mix(in srgb,var(--accent) 18%,var(--panel));stroke:var(--accent)}.warnbox{fill:color-mix(in srgb,var(--warn) 16%,var(--panel));stroke:var(--warn)}.txt{fill:var(--text);font:600 15px system-ui,sans-serif}.smalltxt{fill:var(--muted);font:12px system-ui,sans-serif}.line{stroke:var(--muted);stroke-width:2;marker-end:url(#arrow-ko);fill:none}</style>
           <rect class="box accent" x="40" y="30" width="250" height="82" rx="12"></rect><text class="txt" x="62" y="60">1. 시작 / reload</text><text class="smalltxt" x="62" y="84">설정, 패키지, 리소스 로드</text>
           <rect class="box" x="355" y="30" width="250" height="82" rx="12"></rect><text class="txt" x="377" y="60">2. 확장 로드</text><text class="smalltxt" x="377" y="84">도구, 명령, 훅 등록</text>
-          <rect class="box" x="670" y="30" width="250" height="82" rx="12"></rect><text class="txt" x="692" y="60">3. 리소스 발견</text><text class="smalltxt" x="692" y="84">AGENTS, skills, prompts, SYSTEM</text>
+          <rect class="box" x="670" y="30" width="250" height="82" rx="12"></rect><text class="txt" x="692" y="60">3. 메모리의 리소스</text><text class="smalltxt" x="692" y="84">AGENTS, skills, prompts, SYSTEM</text>
           <path class="line" d="M290 71 H355"></path><path class="line" d="M605 71 H670"></path>
-          <rect class="box accent" x="355" y="160" width="250" height="90" rx="12"></rect><text class="txt" x="377" y="190">4. 기본 시스템 프롬프트</text><text class="smalltxt" x="377" y="214">Default 또는 SYSTEM.md + append</text><text class="smalltxt" x="377" y="232">+ AGENTS + skills + cwd/date</text><path class="line" d="M795 112 V205 H605"></path>
+          <rect class="box accent" x="355" y="160" width="250" height="90" rx="12"></rect><text class="txt" x="377" y="190">4. Instruction stream</text><text class="smalltxt" x="377" y="214">Default OR SYSTEM.md</text><text class="smalltxt" x="377" y="232">+ append + AGENTS + skills + cwd/date</text><path class="line" d="M795 112 V205 H605"></path>
           <rect class="box warnbox" x="40" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="62" y="330">5. 사용자 입력</text><text class="smalltxt" x="62" y="354">텍스트, 이미지, slash command</text>
-          <rect class="box" x="355" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="377" y="330">6. 확장 / 변환</text><text class="smalltxt" x="377" y="354">input hook, /skill, /template</text>
-          <rect class="box" x="670" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="692" y="330">7. before_agent_start</text><text class="smalltxt" x="692" y="354">확장이 메시지를 추가하거나</text><text class="smalltxt" x="692" y="372">이번 턴 prompt를 교체</text>
+          <rect class="box" x="355" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="377" y="330">6. Conversation stream</text><text class="smalltxt" x="377" y="354">input hook, /skill, /template</text>
+          <rect class="box" x="670" y="300" width="250" height="90" rx="12"></rect><text class="txt" x="692" y="330">7. before_agent_start</text><text class="smalltxt" x="692" y="354">메시지 추가 또는 이번 턴</text><text class="smalltxt" x="692" y="372">system prompt 수정</text>
           <path class="line" d="M290 345 H355"></path><path class="line" d="M605 345 H670"></path><path class="line" d="M480 250 V300"></path>
-          <rect class="box accent" x="180" y="470" width="280" height="108" rx="12"></rect><text class="txt" x="202" y="500">8. 최종 모델 요청</text><text class="smalltxt" x="202" y="524">system prompt + history</text><text class="smalltxt" x="202" y="542">+ 확장된 user message</text><text class="smalltxt" x="202" y="560">+ custom messages + tool schemas</text>
-          <rect class="box" x="550" y="470" width="280" height="108" rx="12"></rect><text class="txt" x="572" y="500">9. 도구 루프</text><text class="smalltxt" x="572" y="524">tool_call hook → 도구 실행</text><text class="smalltxt" x="572" y="542">결과 추가 → 다시 모델 호출</text>
+          <rect class="box accent" x="180" y="470" width="280" height="108" rx="12"></rect><text class="txt" x="202" y="500">8. 최종 모델 요청</text><text class="smalltxt" x="202" y="524">instruction + conversation</text><text class="smalltxt" x="202" y="542">+ current user message</text><text class="smalltxt" x="202" y="560">+ active tool schemas</text>
+          <rect class="box" x="550" y="470" width="280" height="108" rx="12"></rect><text class="txt" x="572" y="500">9. 도구 루프</text><text class="smalltxt" x="572" y="524">tool hook → 도구 실행</text><text class="smalltxt" x="572" y="542">결과 추가 → 다시 모델 호출</text>
           <path class="line" d="M795 390 V424 H320 V470"></path><path class="line" d="M460 524 H550"></path><path class="line" d="M690 470 C690 420 520 420 520 470"></path>
         </svg>
 
-        <details open>
-          <summary>단계별 설명</summary>
+        <details>
+          <summary>1–4. 리소스 로딩과 base system prompt</summary>
+          <p>시작 또는 <code>/reload</code> 시 pi는 설정, 패키지, 확장, 스킬, 프롬프트 템플릿, 테마, 컨텍스트 파일, <code>SYSTEM.md</code>, <code>APPEND_SYSTEM.md</code>를 발견하고 나중에 사용할 수 있도록 메모리에 유지합니다.</p>
+          <p>프롬프트 템플릿은 여기서 발견되어 <code>/review</code> 같은 slash command로 바로 사용할 수 있습니다. 스킬도 발견되며, metadata는 system prompt에 소개될 수 있고 full content는 보통 명시적으로 호출하거나 읽을 때 로드됩니다.</p>
+          <p>base system prompt는 둘 중 하나로 시작합니다.</p>
+          <pre><code>built-in default prompt
+OR
+SYSTEM.md</code></pre>
+          <p><code>SYSTEM.md</code>가 있으면 내장 default prompt를 완전히 대체합니다. 그 후 pi는 아래 순서로 내용을 append합니다.</p>
+          <pre><code>1. built-in default prompt OR SYSTEM.md
+2. APPEND_SYSTEM.md / --append-system-prompt
+3. AGENTS.md / CLAUDE.md project context
+4. available skills list, if read tool is active
+5. Current date
+6. Current working directory</code></pre>
+          <p><strong>Append</strong>는 base prompt를 대체하지 않고 system-level instruction을 뒤에 추가한다는 뜻입니다. 추가 전역/프로젝트 규칙은 <code>APPEND_SYSTEM.md</code>, 저장소/프로젝트 가이드는 <code>AGENTS.md</code>에 두는 식으로 생각하면 됩니다.</p>
+        </details>
+
+        <details>
+          <summary>5–7. 사용자 입력 확장과 extension hooks</summary>
+          <p>사용자 입력은 모델 호출 전 처리됩니다.</p>
           <ol>
-            <li><strong>시작/reload:</strong> pi는 설정, 패키지, 확장, 스킬, 프롬프트 템플릿, 테마, 컨텍스트 파일, <code>SYSTEM.md</code>, <code>APPEND_SYSTEM.md</code>를 로드합니다.</li>
-            <li><strong>확장이 기능 등록:</strong> 도구, 명령, 플래그, input hook, tool hook, <code>before_agent_start</code> hook을 등록합니다.</li>
-            <li><strong>활성 도구 선택:</strong> 보통 <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>지만 plan-mode 같은 확장이 바꿀 수 있습니다.</li>
-            <li><strong>base system prompt 생성:</strong> 기본 프롬프트 또는 <code>SYSTEM.md</code>에 append system text, project context, skills, current date, working directory가 결합됩니다.</li>
-            <li><strong>사용자 입력 처리:</strong> 확장 명령이 직접 처리할 수 있고, input hook이 변환할 수 있으며, <code>/skill:name</code>과 prompt template이 확장됩니다.</li>
-            <li><strong>모델 호출 직전:</strong> <code>before_agent_start</code> hook이 custom message를 주입하거나 이번 턴의 system prompt를 수정할 수 있습니다.</li>
-            <li><strong>모델이 받는 것:</strong> effective system prompt, 대화 기록, 현재 사용자 메시지, extension messages, active tool schemas.</li>
-            <li><strong>도구 루프:</strong> 모델의 tool call은 hook을 거쳐 실행되고, 결과가 대화에 추가된 뒤 assistant가 완료할 때까지 다시 모델에 전달됩니다.</li>
+            <li><code>/plan</code> 같은 extension command라면 확장이 직접 처리하고 모델 호출이 없을 수 있습니다.</li>
+            <li><code>input</code> hook이 raw text/images를 변환하거나 처리할 수 있습니다.</li>
+            <li><code>/skill:name args</code>는 full skill body와 args를 포함한 user message로 확장됩니다.</li>
+            <li><code>/review foo</code> 같은 prompt template은 일반 user-message text로 확장됩니다.</li>
+            <li><code>before_agent_start</code> hook은 custom message를 추가하거나 이번 턴의 effective system prompt를 수정할 수 있습니다.</li>
           </ol>
+          <p>중요: <code>/skill</code>과 prompt template은 base system prompt가 아니라 <strong>conversation/user-message stream</strong>을 수정합니다.</p>
+        </details>
+
+        <details>
+          <summary>8. 최종 모델 요청</summary>
+          <p>최종 요청은 하나의 평면 문자열이 아니라 구조화된 요청입니다. 개념적으로는 다음과 같습니다.</p>
+          <pre><code>{
+  system: "effective system prompt",
+  messages: [
+    previous user messages,
+    previous assistant messages,
+    previous tool calls,
+    previous tool results,
+    current expanded user message,
+    extension-injected custom messages
+  ],
+  tools: [
+    read schema,
+    bash schema,
+    edit schema,
+    write schema,
+    extension tool schemas
+  ]
+}</code></pre>
+          <p>system prompt, conversation history, 현재 user message, custom messages, active tool schemas, 이전 tool results가 모두 input token에 기여합니다. 대화가 너무 길어지면 session behavior에 따라 오래된 history가 compact/summarize될 수 있습니다.</p>
+        </details>
+
+        <details>
+          <summary>9. 도구 루프</summary>
+          <p>모델이 작업공간을 읽거나 수정하고 싶으면 tool call을 냅니다. pi는 이를 실행하고 결과를 다음 모델 호출에 다시 포함합니다.</p>
+          <pre><code>model asks for read(package.json)
+→ pi emits tool_call hooks
+→ extension may allow/block/modify
+→ pi executes read
+→ tool result is appended to conversation
+→ model is called again with the result
+→ repeat until assistant finishes</code></pre>
+          <p>확장은 이 루프를 가로채 위험한 bash 명령을 막거나, plan mode에서 도구를 제한하거나, 확인을 요청하거나, 사용 기록을 남기거나, input을 수정하거나, 렌더링을 바꿀 수 있습니다.</p>
         </details>
 
         <details>
@@ -268,11 +344,11 @@ Current working directory: /Users/won/code/won/pi</code></pre>
             <tbody>
               <tr><td><code>AGENTS.md</code> / <code>CLAUDE.md</code></td><td>system prompt의 project context로 append됩니다.</td></tr>
               <tr><td><code>SYSTEM.md</code></td><td>내장 기본 system prompt를 대체합니다.</td></tr>
-              <tr><td><code>APPEND_SYSTEM.md</code></td><td>system prompt에 append됩니다.</td></tr>
-              <tr><td>Prompt template</td><td>모델 호출 전 사용자 메시지를 확장합니다.</td></tr>
-              <tr><td><code>/skill:name</code></td><td>전체 skill을 읽어 사용자 메시지에 주입합니다.</td></tr>
+              <tr><td><code>APPEND_SYSTEM.md</code></td><td>base prompt 뒤에 system prompt로 append됩니다.</td></tr>
+              <tr><td>Prompt template</td><td>모델 호출 전 user message를 확장합니다.</td></tr>
+              <tr><td><code>/skill:name</code></td><td>전체 skill을 읽어 user message에 주입합니다.</td></tr>
               <tr><td>Available skills list</td><td>read tool이 활성화되어 있으면 system prompt에 소개됩니다.</td></tr>
-              <tr><td>Extensions</td><td>도구, 활성 도구 목록, system prompt, 사용자 입력, 메시지, tool call을 바꿀 수 있습니다.</td></tr>
+              <tr><td>Extensions</td><td>도구, active tool list, system prompt, user input, messages, tool calls를 바꿀 수 있습니다.</td></tr>
               <tr><td>Tool schemas</td><td>모델이 호출 가능한 도구 정의로 별도 전달되며 input token을 소비합니다.</td></tr>
             </tbody>
           </table>
@@ -280,9 +356,8 @@ Current working directory: /Users/won/code/won/pi</code></pre>
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
-
       <section id="interactive" class="doc-section" data-search="인터랙티브 사용 slash command 파일 참조 셸 명령 model settings resume new">
-        <h2>6. 인터랙티브 사용 기본</h2>
+        <h2>인터랙티브 사용 기본</h2>
         <ul class="quick-list">
           <li>터미널 에디터에 일반 요청을 입력합니다.</li>
           <li><code>@</code>로 프로젝트 파일을 참조합니다.</li>
@@ -295,7 +370,7 @@ Current working directory: /Users/won/code/won/pi</code></pre>
       </section>
 
       <section id="customization-map" class="doc-section" data-search="커스터마이징 지도 extensions skills prompt templates themes packages settings context">
-        <h2>7. 커스터마이징 지도</h2>
+        <h2>커스터마이징 지도</h2>
         <div class="summary">
           <div class="card"><h3>Extensions</h3><p>명령, 도구, 이벤트, UI, 프로바이더, 동작 변경을 등록하는 TypeScript 코드.</p></div>
           <div class="card"><h3>Skills</h3><p>필요할 때 로드되는 능력 패키지: 지침과 선택적 스크립트/자료.</p></div>
@@ -308,7 +383,7 @@ Current working directory: /Users/won/code/won/pi</code></pre>
       </section>
 
       <section id="extensions" class="doc-section" data-search="확장 로딩 규칙 index ts default export ExtensionAPI registerCommand registerTool registerFlag 이벤트">
-        <h2>8. Extensions</h2>
+        <h2>Extensions</h2>
         <p>확장은 파일/폴더 규칙에 따라 자동 발견됩니다.</p>
         <table>
           <thead><tr><th>위치</th><th>범위</th></tr></thead>
@@ -348,29 +423,119 @@ export default function myExtension(pi: ExtensionAPI): void {
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
-      <section id="plan-mode" class="doc-section" data-search="plan mode 확장 읽기 전용 todos done markers bash allowlist">
-        <h2>9. Plan mode extension</h2>
-        <p>프로젝트 로컬 경로:</p>
-        <pre><code>.pi/extensions/plan-mode/index.ts
-.pi/extensions/plan-mode/utils.ts
-.pi/extensions/plan-mode/README.md</code></pre>
+      <section id="extension-events" class="doc-section" data-search="extension events pi.on context before_agent_start tool_call tool_result session_start input user_bash provider turn message lifecycle 이벤트 확장">
+        <h2>Extension events</h2>
+        <p>확장은 <code>pi.on(eventName, handler)</code>로 pi lifecycle event를 들을 수 있습니다. 이벤트를 통해 resources, session behavior, prompt/message context, tool calls, UI state, provider request를 관찰하거나 수정할 수 있습니다.</p>
+        <pre><code>pi.on("tool_call", async (event, ctx) =&gt; {
+  if (event.toolName === "bash") {
+    // tool call을 inspect, mutate, block 할 수 있음
+  }
+});</code></pre>
+
         <details open>
-          <summary>하는 일</summary>
-          <ol>
-            <li><strong>Plan mode</strong>: 읽기 전용 탐색을 위해 도구를 제한합니다.</li>
-            <li><strong>Bash allowlist</strong>: <code>ls</code>, <code>grep</code>, <code>find</code>, <code>git diff</code> 같은 안전한 명령만 허용합니다.</li>
-            <li><strong>Plan extraction</strong>: <code>Plan:</code> 섹션의 번호 목록에서 단계를 추출합니다.</li>
-            <li><strong>Execution mode</strong>: 일반 도구 접근을 복원하고 진행 상황을 추적합니다.</li>
-            <li><strong>Completion markers</strong>: assistant가 <code>[DONE:n]</code>으로 완료 단계를 표시합니다.</li>
-            <li><strong>UI progress</strong>: footer/status widget에 진행 상황을 보여줍니다.</li>
-          </ol>
+          <summary>Event groups</summary>
+          <table>
+            <thead><tr><th>Group</th><th>Events</th><th>용도</th></tr></thead>
+            <tbody>
+              <tr><td>Resources</td><td><code>resources_discover</code></td><td>startup/reload 중 dynamic skill/prompt/theme path 추가.</td></tr>
+              <tr><td>Session</td><td><code>session_start</code>, <code>session_before_switch</code>, <code>session_before_fork</code>, <code>session_before_compact</code>, <code>session_compact</code>, <code>session_shutdown</code>, <code>session_before_tree</code>, <code>session_tree</code></td><td>상태 복원, session 변경 취소, compaction/tree navigation 커스터마이즈, shutdown cleanup.</td></tr>
+              <tr><td>Prompt/context/provider</td><td><code>context</code>, <code>before_agent_start</code>, <code>before_provider_request</code>, <code>after_provider_response</code></td><td>model messages 필터링, hidden context 주입, per-turn system prompt 수정, provider payload 검사/교체.</td></tr>
+              <tr><td>Agent/message lifecycle</td><td><code>agent_start</code>, <code>agent_end</code>, <code>turn_start</code>, <code>turn_end</code>, <code>message_start</code>, <code>message_update</code>, <code>message_end</code></td><td>진행 상황 추적, UI 업데이트, streaming message 검사, finalized message 수정.</td></tr>
+              <tr><td>Tools</td><td><code>tool_call</code>, <code>tool_result</code>, <code>tool_execution_start</code>, <code>tool_execution_update</code>, <code>tool_execution_end</code></td><td>tool call 차단/수정, 결과 수정, 실행 progress 관찰.</td></tr>
+              <tr><td>Model/settings</td><td><code>model_select</code>, <code>thinking_level_select</code></td><td>model 또는 thinking level 변경에 반응.</td></tr>
+              <tr><td>User input/shell</td><td><code>input</code>, <code>user_bash</code></td><td>사용자 입력 변환, custom syntax 처리, <code>!</code>/<code>!!</code> bash command intercept.</td></tr>
+            </tbody>
+          </table>
         </details>
-        <p>명령: <code>/plan</code>, <code>/todos</code>, <code>Ctrl+Alt+P</code>.</p>
+
+
+        <details>
+          <summary>전체 event reference: 각 event 설명</summary>
+          <table>
+            <thead><tr><th>Event</th><th>언제 발생</th><th>주요 용도</th></tr></thead>
+            <tbody>
+              <tr><td><code>resources_discover</code></td><td>startup/reload 중 resources를 발견할 때.</td><td>skill, prompt-template, theme path를 동적으로 추가.</td></tr>
+              <tr><td><code>session_start</code></td><td>session 시작, reload, resume, fork, new 시.</td><td>UI/state 초기화, persisted extension state 복원, 시작 이유 확인.</td></tr>
+              <tr><td><code>session_before_switch</code></td><td>new/resumed session으로 전환하기 전.</td><td>dirty git repo 같은 조건에서 session switch 취소.</td></tr>
+              <tr><td><code>session_before_fork</code></td><td>session tree의 entry에서 fork하기 전.</td><td>fork 취소 또는 conversation restore skip.</td></tr>
+              <tr><td><code>session_before_compact</code></td><td>conversation context compaction 전.</td><td>compaction 취소 또는 custom compaction result/instructions 제공.</td></tr>
+              <tr><td><code>session_compact</code></td><td>compaction 완료 후.</td><td>compaction 결과 관찰/로그/UI 업데이트.</td></tr>
+              <tr><td><code>session_shutdown</code></td><td>quit/reload/session replacement로 extension runtime이 종료되기 전.</td><td>timer, watcher, handle, background process 정리.</td></tr>
+              <tr><td><code>session_before_tree</code></td><td>session tree navigation 전.</td><td>branch summary/tree navigation 취소 또는 커스터마이즈.</td></tr>
+              <tr><td><code>session_tree</code></td><td>session tree navigation 후.</td><td>new leaf/branch summary에 반응.</td></tr>
+              <tr><td><code>context</code></td><td>각 LLM call 전 message context가 준비될 때.</td><td>모델에게 보낼 conversation messages 필터링/교체.</td></tr>
+              <tr><td><code>before_agent_start</code></td><td>user prompt expansion 후, agent loop 시작 전.</td><td>hidden/custom message 주입 또는 이번 턴 system prompt 수정.</td></tr>
+              <tr><td><code>before_provider_request</code></td><td>raw provider request 전송 직전.</td><td>provider payload 검사, 로그, 교체.</td></tr>
+              <tr><td><code>after_provider_response</code></td><td>provider response 수신 후, stream 소비 전.</td><td>response status/headers 검사, logging/diagnostics.</td></tr>
+              <tr><td><code>agent_start</code></td><td>agent loop 시작 시.</td><td>UI/status 업데이트 또는 timer 시작.</td></tr>
+              <tr><td><code>agent_end</code></td><td>agent loop 종료 시.</td><td>실행 후 UI, summary, notification, follow-up prompt.</td></tr>
+              <tr><td><code>turn_start</code></td><td>각 agent turn/model iteration 시작 시.</td><td>turn index/timing 추적.</td></tr>
+              <tr><td><code>turn_end</code></td><td>각 turn 종료 시. assistant message와 tool results 포함.</td><td>progress marker 추적, 최종 turn output 검사.</td></tr>
+              <tr><td><code>message_start</code></td><td>user/assistant/tool-result message 시작 시.</td><td>message lifecycle 관찰 및 UI 업데이트.</td></tr>
+              <tr><td><code>message_update</code></td><td>assistant message streaming 중.</td><td>token-by-token/streaming updates 검사.</td></tr>
+              <tr><td><code>message_end</code></td><td>message가 finalize될 때.</td><td>같은 role을 유지하면서 finalized message 교체.</td></tr>
+              <tr><td><code>tool_call</code></td><td>tool 실행 전.</td><td>위험한 call 차단 또는 tool input mutate.</td></tr>
+              <tr><td><code>tool_result</code></td><td>tool 실행 후.</td><td>모델이 보기 전 tool result content/details/error state 수정.</td></tr>
+              <tr><td><code>tool_execution_start</code></td><td>tool execution 시작 시.</td><td>tool start 관찰/로그/UI 업데이트.</td></tr>
+              <tr><td><code>tool_execution_update</code></td><td>tool execution 중 partial output 발생 시.</td><td>progress/output을 UI나 log로 stream.</td></tr>
+              <tr><td><code>tool_execution_end</code></td><td>tool execution 종료 시.</td><td>result/error/timing 관찰.</td></tr>
+              <tr><td><code>model_select</code></td><td>선택 model이 변경될 때.</td><td>status UI 업데이트 또는 model-specific behavior 적용.</td></tr>
+              <tr><td><code>thinking_level_select</code></td><td>thinking level 변경 시.</td><td>UI 업데이트 또는 extension behavior 조정.</td></tr>
+              <tr><td><code>user_bash</code></td><td>사용자가 <code>!command</code> 또는 <code>!!command</code>를 실행할 때.</td><td>shell execution override 또는 custom result 제공.</td></tr>
+              <tr><td><code>input</code></td><td>사용자 입력 수신 후, command/template/agent processing 전.</td><td>입력 변환, custom syntax 구현, model call 없이 처리.</td></tr>
+            </tbody>
+          </table>
+        </details>
+        <details>
+          <summary>먼저 이해하면 좋은 이벤트</summary>
+          <table>
+            <thead><tr><th>Event</th><th>언제 발생</th><th>반환 가능</th></tr></thead>
+            <tbody>
+              <tr><td><code>input</code></td><td>사용자 입력 수신 후, skill/template expansion 및 agent processing 전.</td><td><code>{ action: "continue" }</code>, <code>{ action: "transform", text }</code>, <code>{ action: "handled" }</code>.</td></tr>
+              <tr><td><code>before_agent_start</code></td><td>user prompt expansion 후, agent loop 시작 전.</td><td>hidden/custom message 또는 per-turn <code>systemPrompt</code>.</td></tr>
+              <tr><td><code>context</code></td><td>각 LLM call 전, message context 준비 시.</td><td><code>{ messages }</code>로 conversation messages 교체/필터링.</td></tr>
+              <tr><td><code>tool_call</code></td><td>tool 실행 전.</td><td><code>{ block: true, reason }</code>; <code>event.input</code>을 직접 mutate 가능.</td></tr>
+              <tr><td><code>tool_result</code></td><td>tool 실행 후.</td><td>replacement <code>content</code>, <code>details</code>, <code>isError</code>.</td></tr>
+              <tr><td><code>turn_end</code></td><td>assistant turn 종료 후.</td><td>보통 observe-only; <code>[DONE:n]</code> 같은 progress tracking에 좋음.</td></tr>
+              <tr><td><code>agent_end</code></td><td>agent loop 종료 시.</td><td>보통 observe/UI follow-up; 실행 후 summary, prompt, UI action에 유용합니다.</td></tr>
+              <tr><td><code>session_start</code></td><td>session 시작, resume, reload, fork, new 시.</td><td>보통 observe-only; extension state 복원에 좋음.</td></tr>
+            </tbody>
+          </table>
+        </details>
+
+        <details>
+          <summary>Examples</summary>
+          <p>위험한 bash 차단:</p>
+          <pre><code>pi.on("tool_call", async (event) =&gt; {
+  if (event.toolName === "bash" && event.input.command.includes("rm -rf")) {
+    return { block: true, reason: "Blocked dangerous command" };
+  }
+});</code></pre>
+          <p>agent 시작 전 hidden context 주입:</p>
+          <pre><code>pi.on("before_agent_start", async () =&gt; {
+  return {
+    message: {
+      customType: "my-hidden-context",
+      content: "Extra instructions for this turn",
+      display: false,
+    },
+  };
+});</code></pre>
+          <p>stale context message 필터링:</p>
+          <pre><code>pi.on("context", async (event) =&gt; {
+  return {
+    messages: event.messages.filter((m) =&gt; m.customType !== "stale-context"),
+  };
+});</code></pre>
+        </details>
+
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
+
+
       <section id="skills" class="doc-section" data-search="스킬 SKILL md 에이전트 능력 매뉴얼 워크플로 스크립트 자료 skill command">
-        <h2>10. Skills</h2>
+        <h2>Skills</h2>
         <p>스킬은 필요할 때 로드되는 자체 포함 지침입니다. 런타임 TypeScript 훅이 필요 없는 재사용 워크플로에 유용합니다.</p>
         <pre><code>.pi/skills/my-skill/SKILL.md</code></pre>
         <p>사용:</p>
@@ -381,7 +546,7 @@ export default function myExtension(pi: ExtensionAPI): void {
       </section>
 
       <section id="prompts" class="doc-section" data-search="프롬프트 템플릿 prompts markdown slash command arguments ARGUMENTS review">
-        <h2>11. Prompt templates</h2>
+        <h2>Prompt templates</h2>
         <p>프롬프트 템플릿은 <code>.pi/prompts/</code> 아래의 Markdown 파일입니다. 파일명이 슬래시 명령이 됩니다.</p>
         <pre><code>.pi/prompts/review.md   =&gt;   /review</code></pre>
         <details open>
@@ -402,7 +567,7 @@ Check:
       </section>
 
       <section id="skills-vs-prompts" class="doc-section" data-search="스킬 vs 프롬프트 prompt template 나를 위한 skill 에이전트 사용자 매크로 능력 매뉴얼">
-        <h2>12. Skills vs prompt templates</h2>
+        <h2>Skills vs prompt templates</h2>
         <div class="note">간단한 기억법: <strong>prompt template은 나를 위한 것</strong>, <strong>skill은 에이전트를 위한 것</strong>입니다.</div>
         <table>
           <thead><tr><th>리소스</th><th>기억 모델</th><th>사용할 때</th></tr></thead>
@@ -418,7 +583,7 @@ Extension:       pi 동작을 바꾸는 런타임 코드</code></pre>
       </section>
 
       <section id="themes" class="doc-section" data-search="테마 json 색상 tui settings">
-        <h2>13. Themes</h2>
+        <h2>Themes</h2>
         <p>테마는 TUI 색상 정의 JSON입니다.</p>
         <pre><code>.pi/themes/my-theme.json</code></pre>
         <p><code>/settings</code> 또는 설정 JSON으로 선택합니다.</p>
@@ -429,7 +594,7 @@ Extension:       pi 동작을 바꾸는 런타임 코드</code></pre>
       </section>
 
       <section id="settings" class="doc-section" data-search="settings json 전역 프로젝트 model provider theme packages skills prompts">
-        <h2>14. Settings</h2>
+        <h2>Settings</h2>
         <table>
           <thead><tr><th>파일</th><th>용도</th></tr></thead>
           <tbody>
@@ -442,7 +607,7 @@ Extension:       pi 동작을 바꾸는 런타임 코드</code></pre>
       </section>
 
       <section id="context" class="doc-section" data-search="컨텍스트 파일 AGENTS md 프로젝트 지침 build test style architecture safety">
-        <h2>15. Context files</h2>
+        <h2>Context files</h2>
         <p><code>AGENTS.md</code> 같은 컨텍스트 파일은 코딩 스타일, 명령, 테스트 전략, 아키텍처 노트, 저장소 관례를 pi에게 알려주는 프로젝트 지침입니다.</p>
         <ul>
           <li>빌드와 테스트 방법.</li>
@@ -455,7 +620,7 @@ Extension:       pi 동작을 바꾸는 런타임 코드</code></pre>
       </section>
 
       <section id="packages" class="doc-section" data-search="pi packages npm git bundle extensions skills prompts themes share install">
-        <h2>16. Pi packages</h2>
+        <h2>Pi packages</h2>
         <p>Pi 패키지는 확장, 스킬, 프롬프트 템플릿, 테마를 묶어 npm, git, URL, 로컬 경로로 공유할 수 있게 합니다.</p>
         <pre><code>pi install npm:@scope/package
 pi install git:github.com/user/repo
@@ -464,8 +629,129 @@ pi install ./local-package</code></pre>
         <a class="top-link" href="#top">맨 위로</a>
       </section>
 
+      <section id="plan-mode" class="doc-section" data-search="plan mode 확장 읽기 전용 todos done markers bash allowlist">
+        <h2>Plan mode 예제 학습</h2>
+        <p>프로젝트 로컬 경로:</p>
+        <pre><code>.pi/extensions/plan-mode/index.ts
+.pi/extensions/plan-mode/utils.ts
+.pi/extensions/plan-mode/README.md</code></pre>
+        <details open>
+          <summary>하는 일</summary>
+          <ol>
+            <li><strong>Plan mode</strong>: 읽기 전용 탐색을 위해 도구를 제한합니다.</li>
+            <li><strong>Bash allowlist</strong>: <code>ls</code>, <code>grep</code>, <code>find</code>, <code>git diff</code> 같은 안전한 명령만 허용합니다.</li>
+            <li><strong>Plan extraction</strong>: <code>Plan:</code> 섹션의 번호 목록에서 단계를 추출합니다.</li>
+            <li><strong>Execution mode</strong>: 일반 도구 접근을 복원하고 진행 상황을 추적합니다.</li>
+            <li><strong>Completion markers</strong>: assistant가 <code>[DONE:n]</code>으로 완료 단계를 표시합니다.</li>
+            <li><strong>UI progress</strong>: footer/status widget에 진행 상황을 보여줍니다.</li>
+          </ol>
+        </details>
+        <p>명령: <code>/plan</code>, <code>/todos</code>, <code>Ctrl+Alt+P</code>.</p>
+        <details>
+          <summary>학습 중 발견한 점과 gotchas</summary>
+          <table>
+            <thead><tr><th>발견</th><th>왜 중요한가</th></tr></thead>
+            <tbody>
+              <tr><td><code>/plan</code>은 mode를 toggle하고 todos를 reset합니다</td><td>예제는 plan mode를 toggle할 때마다 <code>todoItems</code>를 비웁니다. 단순한 표시 변경이 아닙니다.</td></tr>
+              <tr><td><code>setActiveTools()</code>는 active tools를 교체합니다</td><td>plan mode는 hard-coded tool list를 사용합니다. 다른 extension이 활성화한 tools와 merge하지 않습니다.</td></tr>
+              <tr><td>다른 extension tools가 비활성화될 수 있습니다</td><td>다른 extension이 custom tools를 등록/활성화했더라도 plan mode toggle로 모델에게 보이지 않게 될 수 있습니다.</td></tr>
+              <tr><td><code>NORMAL_MODE_TOOLS</code>도 hard-coded입니다</td><td>plan mode를 끄면 사용자의 이전 active tool set이 아니라 <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>만 복원합니다.</td></tr>
+              <tr><td><code>grep</code>, <code>find</code>, <code>ls</code>는 built-in이지만 default active는 아닙니다</td><td>pi가 이 도구들을 알고 있으므로 normal coding mode가 보통 <code>read</code>, <code>bash</code>, <code>edit</code>, <code>write</code>로 시작해도 plan mode가 활성화할 수 있습니다.</td></tr>
+              <tr><td><code>questionnaire</code>는 built-in이 아닙니다</td><td>별도 example extension에서 제공됩니다. 해당 extension이 로드되지 않았다면 <code>setActiveTools()</code>에서 무시됩니다.</td></tr>
+              <tr><td>Registered tools vs active tools</td><td>plan mode는 active tools를 바꿉니다. tools를 생성, 삭제, unregister하는 것은 아닙니다.</td></tr>
+            </tbody>
+          </table>
+          <p>더 견고한 plan-mode 구현이라면 plan mode를 켜기 전에 <code>pi.getActiveTools()</code>를 저장하고, 끌 때 그 목록을 정확히 복원해야 합니다.</p>
+        </details>
+        <a class="top-link" href="#top">맨 위로</a>
+      </section>
+
+      <section id="example-extensions" class="doc-section" data-search="example extensions pi examples commands tools ui hooks providers games safety plan mode subagent custom provider 예제 확장">
+        <h2>예제 확장 카탈로그</h2>
+        <p>pi는 <code>examples/extensions/</code> 아래에 많은 예제 확장을 제공합니다. 각 예제는 서로 다른 extension capability를 보여주므로 학습 자료로 좋습니다.</p>
+        <div class="note">학습 순서 추천: <code>hello.ts</code>, <code>commands.ts</code>, <code>permission-gate.ts</code>, <code>plan-mode/</code>를 먼저 보고, 그 다음 <code>status-line.ts</code>, <code>question.ts</code> 같은 UI 예제를 보세요.</div>
+        <details>
+          <summary>전체 예제 확장: 하는 일과 작동 방식</summary>
+<table><thead><tr><th>Example</th><th>What it does</th><th>How it works</th></tr></thead><tbody>
+<tr><td><code>hello.ts</code></td><td>Minimal custom tool example</td><td>Registers a simple model-callable tool to demonstrate tool definition basics.</td></tr>
+<tr><td><code>commands.ts</code></td><td>List available slash commands</td><td>Uses pi.getCommands() and registers /commands.</td></tr>
+<tr><td><code>tools.ts</code></td><td>Enable/disable tools interactively</td><td>Registers /tools and persists selected active tools across reloads/branches.</td></tr>
+<tr><td><code>dynamic-tools.ts</code></td><td>Register tools at runtime</td><td>Adds tools during session_start and later through a command.</td></tr>
+<tr><td><code>tool-override.ts</code></td><td>Override built-in tools</td><td>Registers a tool with the same name as a built-in tool to replace behavior/rendering.</td></tr>
+<tr><td><code>structured-output.ts</code></td><td>End on structured tool call</td><td>Uses terminate: true so the agent can finish with a tool result without extra LLM turn.</td></tr>
+<tr><td><code>truncated-tool.ts</code></td><td>Safe custom tool output truncation</td><td>Demonstrates truncating large tool output before it enters model context.</td></tr>
+<tr><td><code>todo.ts</code></td><td>LLM-managed todo list</td><td>Registers a todo tool and /todos command; persists state via session entries.</td></tr>
+<tr><td><code>question.ts</code></td><td>Ask one structured question</td><td>Registers an interactive custom UI tool for one question/options.</td></tr>
+<tr><td><code>questionnaire.ts</code></td><td>Ask multiple structured questions</td><td>Registers a multi-question custom UI tool with tab navigation.</td></tr>
+<tr><td><code>qna.ts</code></td><td>Extract questions from assistant output</td><td>Uses /qna to analyze last assistant message and show answer UI.</td></tr>
+<tr><td><code>permission-gate.ts</code></td><td>Confirm dangerous bash commands</td><td>Intercepts tool_call for bash and asks before rm -rf/sudo/chmod-like commands.</td></tr>
+<tr><td><code>protected-paths.ts</code></td><td>Block edits/writes to sensitive paths</td><td>Intercepts write/edit tool calls and blocks configured protected paths.</td></tr>
+<tr><td><code>confirm-destructive.ts</code></td><td>Confirm destructive session actions</td><td>Uses before-session events to cancel clear/switch/branch unless confirmed.</td></tr>
+<tr><td><code>dirty-repo-guard.ts</code></td><td>Prevent switching with dirty git repo</td><td>Checks git status before session changes and blocks when uncommitted changes exist.</td></tr>
+<tr><td><code>auto-commit-on-exit.ts</code></td><td>Commit changes on exit</td><td>Uses lifecycle/session exit hook and last assistant message to generate git commit.</td></tr>
+<tr><td><code>git-checkpoint.ts</code></td><td>Stash checkpoints each turn</td><td>Creates git stash checkpoints and restores them when forking session history.</td></tr>
+<tr><td><code>sandbox/</code></td><td>Sandbox bash commands</td><td>Wraps bash execution with OS-level sandbox restrictions for filesystem/network.</td></tr>
+<tr><td><code>plan-mode/</code></td><td>Read-only planning mode</td><td>Registers /plan, restricts tools/bash allowlist, extracts plan steps, tracks [DONE:n].</td></tr>
+<tr><td><code>preset.ts</code></td><td>Named mode presets</td><td>Loads preset config that changes model, thinking level, tools, and system prompt additions.</td></tr>
+<tr><td><code>minimal-mode.ts</code></td><td>Minimal tool display mode</td><td>Overrides rendering of built-in tool calls/results for compact UI.</td></tr>
+<tr><td><code>inline-bash.ts</code></td><td>Inline shell expansion in prompts</td><td>Uses input hook to replace inline shell expressions with command output.</td></tr>
+<tr><td><code>input-transform.ts</code></td><td>Input event demo</td><td>Uses input hook to intercept, transform, or handle user input before expansion.</td></tr>
+<tr><td><code>file-trigger.ts</code></td><td>External file-to-agent trigger</td><td>Watches a trigger file and injects its content as messages.</td></tr>
+<tr><td><code>send-user-message.ts</code></td><td>Send user messages from extension</td><td>Uses pi.sendUserMessage() to enqueue real user messages programmatically.</td></tr>
+<tr><td><code>reload-runtime.ts</code></td><td>Reload from command/tool</td><td>Uses ctx.reload() and a tool/follow-up command to trigger runtime reload.</td></tr>
+<tr><td><code>trigger-compact.ts</code></td><td>Trigger compaction</td><td>Demonstrates invoking/session compaction behavior from an extension.</td></tr>
+<tr><td><code>custom-compaction.ts</code></td><td>Replace compaction behavior</td><td>Overrides default compaction with custom full-context summary logic.</td></tr>
+<tr><td><code>summarize.ts</code></td><td>Conversation summary command</td><td>Adds command/tooling to summarize conversation context.</td></tr>
+<tr><td><code>handoff.ts</code></td><td>Create focused new session</td><td>Extracts useful context and starts a new session instead of lossy compaction.</td></tr>
+<tr><td><code>pirate.ts</code></td><td>Dynamic system prompt mode</td><td>Uses before_agent_start to append pirate instructions when enabled.</td></tr>
+<tr><td><code>prompt-customizer.ts</code></td><td>Context-aware prompt modification</td><td>Inspects systemPromptOptions and modifies system prompt without rediscovering resources.</td></tr>
+<tr><td><code>system-prompt-header.ts</code></td><td>Show system prompt length</td><td>Uses ctx.getSystemPrompt() and UI status/widget to display prompt size.</td></tr>
+<tr><td><code>claude-rules.ts</code></td><td>Expose .claude/rules to agent</td><td>Scans rules directory and appends available rule list to system prompt.</td></tr>
+<tr><td><code>hidden-thinking-label.ts</code></td><td>Customize hidden thinking label</td><td>Uses ctx.ui.setHiddenThinkingLabel().</td></tr>
+<tr><td><code>working-indicator.ts</code></td><td>Customize streaming indicator</td><td>Uses ctx.ui.setWorkingIndicator() while agent is working.</td></tr>
+<tr><td><code>working-message-test.ts</code></td><td>Persist working message test</td><td>Sets custom working message/indicator at session start to test persistence.</td></tr>
+<tr><td><code>titlebar-spinner.ts</code></td><td>Terminal title spinner</td><td>Uses ctx.ui.setTitle() repeatedly while agent is working.</td></tr>
+<tr><td><code>notify.ts</code></td><td>Native terminal notification</td><td>Sends terminal notification when agent finishes and waits for input.</td></tr>
+<tr><td><code>status-line.ts</code></td><td>Footer status text</td><td>Uses ctx.ui.setStatus() to show persistent footer status.</td></tr>
+<tr><td><code>model-status.ts</code></td><td>Show model changes</td><td>Uses model_select hook and footer status.</td></tr>
+<tr><td><code>custom-footer.ts</code></td><td>Replace/customize footer</td><td>Uses ctx.ui.setFooter() with git/model/status data.</td></tr>
+<tr><td><code>custom-header.ts</code></td><td>Replace startup header</td><td>Uses ctx.ui.setHeader() to render custom header component.</td></tr>
+<tr><td><code>border-status-editor.ts</code></td><td>Editor border/status customization</td><td>Demonstrates editor/status visual customization.</td></tr>
+<tr><td><code>rainbow-editor.ts</code></td><td>Animated editor highlight</td><td>Customizes editor rendering/highlighting for special words.</td></tr>
+<tr><td><code>modal-editor.ts</code></td><td>Vim-like modal editor</td><td>Replaces/enhances editor behavior with normal/insert modes and keybindings.</td></tr>
+<tr><td><code>widget-placement.ts</code></td><td>Widget positioning demo</td><td>Demonstrates where extension widgets can be placed.</td></tr>
+<tr><td><code>message-renderer.ts</code></td><td>Custom message rendering</td><td>Registers message renderer for custom messages with formatting/details.</td></tr>
+<tr><td><code>built-in-tool-renderer.ts</code></td><td>Custom built-in tool rendering</td><td>Overrides display of read/bash/edit/write without changing tool behavior.</td></tr>
+<tr><td><code>overlay-test.ts</code></td><td>Overlay UI demo</td><td>Shows floating overlay with inline inputs to test compositing.</td></tr>
+<tr><td><code>overlay-qa-tests.ts</code></td><td>Overlay edge-case tests</td><td>Provides commands for animation/positioning/edge-case QA.</td></tr>
+<tr><td><code>doom-overlay/</code></td><td>DOOM as overlay</td><td>Uses custom overlay UI and keyboard handling to run DOOM.</td></tr>
+<tr><td><code>snake.ts</code></td><td>Snake game</td><td>Registers /snake custom UI game.</td></tr>
+<tr><td><code>space-invaders.ts</code></td><td>Space Invaders game</td><td>Registers /invaders using keyboard press/release handling.</td></tr>
+<tr><td><code>tic-tac-toe.ts</code></td><td>Tic-tac-toe game/tool</td><td>User plays via UI; agent plays via sequential execution tool.</td></tr>
+<tr><td><code>timed-confirm.ts</code></td><td>Timed dialogs</td><td>Shows confirm/select dialogs with live countdown/autocancel.</td></tr>
+<tr><td><code>event-bus.ts</code></td><td>Inter-extension communication</td><td>Uses pi.events to emit/listen between extensions.</td></tr>
+<tr><td><code>bookmark.ts</code></td><td>Label session entries</td><td>Uses setLabel so important entries are easier to find in /tree.</td></tr>
+<tr><td><code>session-name.ts</code></td><td>Friendly session names</td><td>Uses setSessionName/getSessionName.</td></tr>
+<tr><td><code>shutdown-command.ts</code></td><td>Clean shutdown command</td><td>Registers /quit and calls ctx.shutdown().</td></tr>
+<tr><td><code>rpc-demo.ts</code></td><td>RPC extension UI demo</td><td>Exercises extension UI methods for RPC integrations.</td></tr>
+<tr><td><code>bash-spawn-hook.ts</code></td><td>Modify bash spawn context</td><td>Uses bash spawn hook to adjust command, cwd, or environment before execution.</td></tr>
+<tr><td><code>interactive-shell.ts</code></td><td>Run interactive terminal commands</td><td>Suspends TUI and gives full terminal control to interactive commands.</td></tr>
+<tr><td><code>ssh.ts</code></td><td>Remote SSH execution</td><td>Delegates read/write/edit/bash operations to a remote machine over SSH.</td></tr>
+<tr><td><code>provider-payload.ts</code></td><td>Inspect/modify provider request payload</td><td>Hooks provider payload before request, e.g. logging/changing temperature.</td></tr>
+<tr><td><code>custom-provider-anthropic/</code></td><td>Custom Anthropic-like provider</td><td>Registers custom provider, streaming implementation, and OAuth behavior.</td></tr>
+<tr><td><code>custom-provider-gitlab-duo/</code></td><td>GitLab Duo provider</td><td>Registers provider that delegates GitLab Duo AI Gateway to Anthropic/OpenAI streaming.</td></tr>
+<tr><td><code>github-issue-autocomplete.ts</code></td><td>GitHub issue autocomplete</td><td>Uses gh to preload issues and provide #issue completion.</td></tr>
+<tr><td><code>mac-system-theme.ts</code></td><td>Sync with macOS dark/light mode</td><td>Detects macOS appearance and switches pi theme.</td></tr>
+<tr><td><code>dynamic-resources/</code></td><td>Dynamic resources demo</td><td>Extension contributes skills/prompts/themes at runtime.</td></tr>
+<tr><td><code>with-deps/</code></td><td>Extension with npm dependencies</td><td>Shows extension-local package.json/node_modules dependency resolution.</td></tr>
+<tr><td><code>subagent/</code></td><td>Delegate to subagents</td><td>Registers a tool that spawns separate pi processes with specialized prompts/context.</td></tr>
+</tbody></table>
+        </details>
+        <a class="top-link" href="#top">맨 위로</a>
+      </section>
+
       <section id="quick-reference" class="doc-section" data-search="빠른 참조 목표 사용 extensions skills prompts themes settings AGENTS">
-        <h2>17. 빠른 참조</h2>
+        <h2>빠른 참조</h2>
         <table>
           <thead><tr><th>목표</th><th>사용</th></tr></thead>
           <tbody>
@@ -482,7 +768,7 @@ pi install ./local-package</code></pre>
       </section>
 
       <section id="study-checklist" class="doc-section" data-search="학습 체크리스트 extension skill prompt template AGENTS">
-        <h2>18. 학습 체크리스트</h2>
+        <h2>학습 체크리스트</h2>
         <ul>
           <li>기본 도구 read/write/edit/bash 이해하기.</li>
           <li>확장 로딩 규칙 익히기.</li>
